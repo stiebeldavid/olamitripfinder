@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -9,18 +8,36 @@ import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const fetchTrips = async () => {
+const fetchTrips = async (): Promise<Trip[]> => {
   const { data, error } = await supabase
     .from('trips')
     .select(`
       *,
-      gallery:trip_gallery(*),
-      videos:trip_videos(*)
+      gallery:trip_gallery(image_path),
+      videos:trip_videos(video_url)
     `)
     .order('start_date', { ascending: true });
   
   if (error) throw error;
-  return data;
+  
+  return data.map(trip => ({
+    id: trip.id,
+    name: trip.name,
+    description: trip.description || "",
+    startDate: trip.start_date,
+    endDate: trip.end_date,
+    websiteUrl: trip.website_url,
+    organizer: {
+      name: trip.organizer_name,
+      contact: trip.organizer_contact
+    },
+    gender: trip.gender,
+    location: trip.location,
+    spots: trip.spots,
+    brochureImage: trip.brochure_image_path,
+    gallery: trip.gallery?.map(g => g.image_path) || [],
+    videoLinks: trip.videos?.map(v => v.video_url) || []
+  }));
 };
 
 const Index = () => {
