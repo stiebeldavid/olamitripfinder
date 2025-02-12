@@ -58,13 +58,12 @@ const Index = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     gender: {
-      mixed: true,
-      men: true,
-      women: true,
+      coed: true,
+      male: true,
+      female: true,
     },
     location: {
       us: true,
-      israel: true,
       international: true,
     }
   });
@@ -180,46 +179,46 @@ const Index = () => {
           
           <div className="hidden md:grid grid-cols-2 gap-6 bg-white p-4 shadow-sm">
             <div>
-              <h3 className="font-medium mb-3">Gender</h3>
+              <h3 className="font-medium mb-3">Single-Gender/Co-ed</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox 
-                    id="mixed"
-                    checked={filters.gender.mixed}
+                    id="coed"
+                    checked={filters.gender.coed}
                     onCheckedChange={(checked) => 
                       setFilters(prev => ({
                         ...prev,
-                        gender: { ...prev.gender, mixed: checked === true }
+                        gender: { ...prev.gender, coed: checked === true }
                       }))
                     }
                   />
-                  <label htmlFor="mixed" className="text-sm">Mixed Gender</label>
+                  <label htmlFor="coed" className="text-sm">Co-ed</label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox 
-                    id="men"
-                    checked={filters.gender.men}
+                    id="male"
+                    checked={filters.gender.male}
                     onCheckedChange={(checked) => 
                       setFilters(prev => ({
                         ...prev,
-                        gender: { ...prev.gender, men: checked === true }
+                        gender: { ...prev.gender, male: checked === true }
                       }))
                     }
                   />
-                  <label htmlFor="men" className="text-sm">Men Only</label>
+                  <label htmlFor="male" className="text-sm">Male</label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox 
-                    id="women"
-                    checked={filters.gender.women}
+                    id="female"
+                    checked={filters.gender.female}
                     onCheckedChange={(checked) => 
                       setFilters(prev => ({
                         ...prev,
-                        gender: { ...prev.gender, women: checked === true }
+                        gender: { ...prev.gender, female: checked === true }
                       }))
                     }
                   />
-                  <label htmlFor="women" className="text-sm">Women Only</label>
+                  <label htmlFor="female" className="text-sm">Female</label>
                 </div>
               </div>
             </div>
@@ -239,19 +238,6 @@ const Index = () => {
                     }
                   />
                   <label htmlFor="us" className="text-sm">US</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="israel"
-                    checked={filters.location.israel}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        location: { ...prev.location, israel: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="israel" className="text-sm">Israel</label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox 
