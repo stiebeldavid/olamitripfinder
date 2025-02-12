@@ -75,37 +75,43 @@ const Index = () => {
   const TripCard = ({ trip }: { trip: Trip }) => (
     <div
       key={trip.id}
-      className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer"
+      className="relative group overflow-hidden"
       onClick={() => setSelectedTrip(trip)}
     >
-      <img
-        src={trip.brochureImage || DEFAULT_IMAGE}
-        alt={trip.name}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-4">
-        <h3 className="font-medium mb-1">{trip.name}</h3>
-        <p className="text-sm text-gray-600 mb-2">{trip.description}</p>
-        <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            <span>
-              {format(new Date(trip.startDate), "MMM d")} -{" "}
-              {format(new Date(trip.endDate), "MMM d")}
-            </span>
+      <div className="relative h-[280px]">
+        <img
+          src={trip.brochureImage || DEFAULT_IMAGE}
+          alt={trip.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <h3 className="text-2xl font-bold mb-3">{trip.name}</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+              <MapPin className="w-4 h-4" />
+              <span className="text-sm capitalize">{trip.location}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+              <User className="w-4 h-4" />
+              <span className="text-sm capitalize">{trip.gender || 'Mixed'}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <MapPin className="w-4 h-4" />
-            <span className="capitalize">{trip.location}</span>
+          <div className="flex gap-2">
+            <Button 
+              className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none"
+            >
+              Learn More
+            </Button>
+            {trip.spots != null && (
+              <Button 
+                variant="outline" 
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30"
+              >
+                {trip.spots} spots left
+              </Button>
+            )}
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          {trip.spots != null && (
-            <span className="text-sm text-primary">{trip.spots} spots left</span>
-          )}
-          <Button variant="link" className="text-primary p-0 ml-auto">
-            See Details
-          </Button>
         </div>
       </div>
     </div>
