@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -55,6 +57,19 @@ const Index = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    gender: {
+      mixed: false,
+      men: false,
+      women: false,
+    },
+    location: {
+      all: true,
+      us: false,
+      israel: false,
+      international: false,
+    }
+  });
 
   const { data: trips, isLoading, error } = useQuery({
     queryKey: ['trips'],
@@ -152,7 +167,7 @@ const Index = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
 
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+        <div className="flex flex-col gap-4 mt-4">
           <div className="md:hidden">
             <Button
               variant="outline"
@@ -164,32 +179,111 @@ const Index = () => {
               <span>Filters</span>
             </Button>
           </div>
-          <div className="hidden md:flex gap-2">
-            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-              All Trips
-            </Button>
-            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-              Mixed Gender
-            </Button>
-            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-              Men Only
-            </Button>
-            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-              Women Only
-            </Button>
+          
+          <div className="hidden md:grid grid-cols-2 gap-6 bg-white p-4 shadow-sm">
+            <div>
+              <h3 className="font-medium mb-3">Gender</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="mixed"
+                    checked={filters.gender.mixed}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        gender: { ...prev.gender, mixed: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="mixed" className="text-sm">Mixed Gender</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="men"
+                    checked={filters.gender.men}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        gender: { ...prev.gender, men: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="men" className="text-sm">Men Only</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="women"
+                    checked={filters.gender.women}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        gender: { ...prev.gender, women: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="women" className="text-sm">Women Only</label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-3">Location</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="all"
+                    checked={filters.location.all}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        location: { ...prev.location, all: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="all" className="text-sm">All Locations</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="us"
+                    checked={filters.location.us}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        location: { ...prev.location, us: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="us" className="text-sm">US</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="israel"
+                    checked={filters.location.israel}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        location: { ...prev.location, israel: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="israel" className="text-sm">Israel</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="international"
+                    checked={filters.location.international}
+                    onCheckedChange={(checked) => 
+                      setFilters(prev => ({
+                        ...prev,
+                        location: { ...prev.location, international: checked === true }
+                      }))
+                    }
+                  />
+                  <label htmlFor="international" className="text-sm">International</label>
+                </div>
+              </div>
+            </div>
           </div>
-          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-            All
-          </Button>
-          <Button variant="default" size="sm" className="shadow-sm whitespace-nowrap">
-            US
-          </Button>
-          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-            Israel
-          </Button>
-          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
-            International
-          </Button>
         </div>
       </div>
 
