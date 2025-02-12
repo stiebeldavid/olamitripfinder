@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -59,15 +58,14 @@ const Index = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     gender: {
-      mixed: false,
-      men: false,
-      women: false,
+      mixed: true,
+      men: true,
+      women: true,
     },
     location: {
-      all: true,
-      us: false,
-      israel: false,
-      international: false,
+      us: true,
+      israel: true,
+      international: true,
     }
   });
 
@@ -229,19 +227,6 @@ const Index = () => {
             <div>
               <h3 className="font-medium mb-3">Location</h3>
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="all"
-                    checked={filters.location.all}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        location: { ...prev.location, all: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="all" className="text-sm">All Locations</label>
-                </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox 
                     id="us"
