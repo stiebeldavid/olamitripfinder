@@ -1,59 +1,95 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import type { Trip } from "@/types/trip";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const mockTrips = [
-  {
-    id: "1",
-    name: "Mountain Adventure Trek",
-    description: "Experience breathtaking views and challenging trails in the Rockies",
-    startDate: "2025-02-15",
-    endDate: "2025-02-20",
-    location: "us",
-    spots: 8,
-    organizer: {
-      name: "Trek Adventures",
-      contact: "info@trekadventures.com"
-    },
-    brochureImage: "https://public.readdy.ai/ai/img_res/ae8b17dd7160f24a7f1b5ec1c4595f71.jpg"
-  },
-  {
-    id: "2",
-    name: "Desert Safari Adventure",
-    description: "Luxury camping experience in the heart of the Negev Desert",
-    startDate: "2025-02-22",
-    endDate: "2025-02-25",
-    location: "israel",
-    spots: 5,
-    organizer: {
-      name: "Israel Outdoors",
-      contact: "info@israeloutdoors.com"
-    },
-    brochureImage: "https://public.readdy.ai/ai/img_res/f02d9f6f27b282ba6157df78b3cbf3ad.jpg"
-  },
-  {
-    id: "3",
-    name: "Mediterranean Explorer",
-    description: "Discover the charm of coastal towns and historic sites",
-    startDate: "2025-03-05",
-    endDate: "2025-03-15",
-    location: "international",
-    spots: 3,
-    organizer: {
-      name: "Euro Travel",
-      contact: "info@eurotravel.com"
-    },
-    brochureImage: "https://public.readdy.ai/ai/img_res/0437fc392f9c833e7a20e7ebad5fcca8.jpg"
-  }
-];
+const fetchTrips = async () => {
+  const { data, error } = await supabase
+    .from('trips')
+    .select(`
+      *,
+      gallery:trip_gallery(*),
+      videos:trip_videos(*)
+    `)
+    .order('start_date', { ascending: true });
+  
+  if (error) throw error;
+  return data;
+};
 
 const Index = () => {
-  const [selectedTrip, setSelectedTrip] = useState<(typeof mockTrips)[0] | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+
+  const { data: trips, isLoading, error } = useQuery({
+    queryKey: ['trips'],
+    queryFn: fetchTrips,
+  });
+
+  const groupTripsByMonth = (trips: Trip[]) => {
+    return trips?.reduce((acc, trip) => {
+      const month = format(new Date(trip.startDate), 'MMMM yyyy');
+      if (!acc[month]) {
+        acc[month] = [];
+      }
+      acc[month].push(trip);
+      return acc;
+    }, {} as Record<string, Trip[]>);
+  };
+
+  const TripCard = ({ trip }: { trip: Trip }) => (
+    <div
+      key={trip.id}
+      className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer"
+      onClick={() => setSelectedTrip(trip)}
+    >
+      <img
+        src={trip.brochureImage || '/placeholder.svg'}
+        alt={trip.name}
+        className="w-full h-48 object-cover"
+      />
+      <div className="p-4">
+        <h3 className="font-medium mb-1">{trip.name}</h3>
+        <p className="text-sm text-gray-600 mb-2">{trip.description}</p>
+        <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+          <div className="flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            <span>
+              {format(new Date(trip.startDate), "MMM d")} -{" "}
+              {format(new Date(trip.endDate), "MMM d")}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin className="w-4 h-4" />
+            <span className="capitalize">{trip.location}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-primary">{trip.spots} spots left</span>
+          <Button variant="link" className="text-primary p-0">
+            See Details
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-medium mb-2">Error loading trips</h2>
+          <p className="text-gray-600">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-14">
@@ -121,93 +157,36 @@ const Index = () => {
       </div>
 
       <div className="px-4 pb-20 max-w-7xl mx-auto">
-        <div className="mt-4">
-          <h2 className="text-lg font-medium mb-3">February 2025</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockTrips
-              .filter(trip => new Date(trip.startDate).getMonth() === 1)
-              .map(trip => (
-                <div
-                  key={trip.id}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedTrip(trip)}
-                >
-                  <img
-                    src={trip.brochureImage}
-                    alt={trip.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-medium mb-1">{trip.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{trip.description}</p>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {format(new Date(trip.startDate), "MMM d")} -{" "}
-                          {format(new Date(trip.endDate), "MMM d")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span className="capitalize">{trip.location}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-primary">{trip.spots} spots left</span>
-                      <Button variant="link" className="text-primary p-0">
-                        See Details
-                      </Button>
-                    </div>
-                  </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <Skeleton className="w-full h-48" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-6 w-2/3" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-lg font-medium mb-3">March 2025</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockTrips
-              .filter(trip => new Date(trip.startDate).getMonth() === 2)
-              .map(trip => (
-                <div
-                  key={trip.id}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedTrip(trip)}
-                >
-                  <img
-                    src={trip.brochureImage}
-                    alt={trip.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-medium mb-1">{trip.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{trip.description}</p>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {format(new Date(trip.startDate), "MMM d")} -{" "}
-                          {format(new Date(trip.endDate), "MMM d")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span className="capitalize">{trip.location}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-primary">{trip.spots} spots left</span>
-                      <Button variant="link" className="text-primary p-0">
-                        See Details
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        ) : trips && trips.length > 0 ? (
+          Object.entries(groupTripsByMonth(trips)).map(([month, monthTrips]) => (
+            <div key={month} className="mt-4">
+              <h2 className="text-lg font-medium mb-3">{month}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {monthTrips.map((trip) => (
+                  <TripCard key={trip.id} trip={trip} />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center mt-8">
+            <h3 className="text-lg font-medium">No trips found</h3>
+            <p className="text-gray-600 mt-1">Try adjusting your filters</p>
           </div>
-        </div>
+        )}
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
@@ -246,7 +225,7 @@ const Index = () => {
             </div>
             <div className="p-4">
               <img
-                src={selectedTrip.brochureImage}
+                src={selectedTrip.brochureImage || '/placeholder.svg'}
                 alt={selectedTrip.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
@@ -271,15 +250,53 @@ const Index = () => {
                 </div>
               </div>
 
+              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-2">Gallery</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedTrip.gallery.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`Trip image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-2">Videos</h4>
+                  <div className="space-y-2">
+                    {selectedTrip.videoLinks.map((video, index) => (
+                      <div key={index} className="aspect-video">
+                        <iframe
+                          src={video}
+                          className="w-full h-full rounded-lg"
+                          allowFullScreen
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid gap-2">
-                <Button className="w-full" onClick={() => window.open("https://example.com", "_blank")}>
-                  Learn More
-                </Button>
-                <Button variant="outline" className="w-full border-primary text-primary">
-                  Download Flyer
+                {selectedTrip.websiteUrl && (
+                  <Button 
+                    className="w-full" 
+                    onClick={() => window.open(selectedTrip.websiteUrl, "_blank")}
+                  >
+                    Learn More
+                  </Button>
+                )}
+                <Button variant="outline" className="w-full">
+                  Contact Organizer
                 </Button>
                 <Button variant="outline" className="w-full">
-                  Copy Link
+                  Share Trip
                 </Button>
               </div>
             </div>
