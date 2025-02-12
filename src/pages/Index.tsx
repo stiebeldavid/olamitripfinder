@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
+import ImageViewer from "@/components/ImageViewer";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -53,6 +54,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
 const Index = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data: trips, isLoading, error } = useQuery({
     queryKey: ['trips'],
@@ -251,11 +253,26 @@ const Index = () => {
               </Button>
             </div>
             <div className="p-4">
-              <img
-                src={selectedTrip.brochureImage || DEFAULT_IMAGE}
-                alt={selectedTrip.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="col-span-4">
+                  <img
+                    src={selectedTrip.brochureImage || DEFAULT_IMAGE}
+                    alt={selectedTrip.name}
+                    className="w-full h-48 object-cover rounded-lg cursor-pointer"
+                    onClick={() => setSelectedImage(selectedTrip.brochureImage || DEFAULT_IMAGE)}
+                  />
+                </div>
+                {selectedTrip.gallery?.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Trip image ${index + 1}`}
+                    className="w-full aspect-square object-cover rounded-lg cursor-pointer"
+                    onClick={() => setSelectedImage(image)}
+                  />
+                ))}
+              </div>
+              
               <h3 className="text-xl font-medium mb-2">{selectedTrip.name}</h3>
               <p className="text-gray-600 mb-4">{selectedTrip.description}</p>
 
@@ -276,22 +293,6 @@ const Index = () => {
                   <span className="text-gray-600">{selectedTrip.spots} spots available</span>
                 </div>
               </div>
-
-              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="font-medium mb-2">Gallery</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedTrip.gallery.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`Trip image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && (
                 <div className="mb-6">
@@ -329,6 +330,14 @@ const Index = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedImage && (
+        <ImageViewer
+          src={selectedImage}
+          alt="Trip image"
+          onClose={() => setSelectedImage(null)}
+        />
       )}
     </div>
   );
