@@ -209,8 +209,11 @@ const Index = () => {
           </div>
         ) : trips && trips.length > 0 ? (
           Object.entries(groupTripsByMonth(trips)).map(([month, monthTrips]) => (
-            <div key={month} className="mt-4">
-              <h2 className="text-lg font-medium mb-3">{month}</h2>
+            <div key={month} className="mt-8 first:mt-4">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold mb-2">{month}</h2>
+                <div className="h-1 w-16 bg-[#FF6B00]"></div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {monthTrips.map((trip) => (
                   <TripCard key={trip.id} trip={trip} />
