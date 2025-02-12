@@ -136,7 +136,7 @@ export type Database = {
           name: string
           organizer_contact: string
           organizer_name: string
-          spots: number
+          spots: number | null
           start_date: string
           updated_at: string
           website_url: string | null
@@ -152,7 +152,7 @@ export type Database = {
           name: string
           organizer_contact: string
           organizer_name: string
-          spots: number
+          spots?: number | null
           start_date: string
           updated_at?: string
           website_url?: string | null
@@ -168,7 +168,7 @@ export type Database = {
           name?: string
           organizer_contact?: string
           organizer_name?: string
-          spots?: number
+          spots?: number | null
           start_date?: string
           updated_at?: string
           website_url?: string | null

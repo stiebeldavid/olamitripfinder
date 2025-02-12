@@ -43,6 +43,7 @@ const AddTrip = () => {
 
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
+    const spotsValue = formData.get('spots') as string;
 
     try {
       // Upload brochure image if exists
@@ -61,13 +62,13 @@ const AddTrip = () => {
         .from('trips')
         .insert({
           name: formData.get('name') as string,
-          description: formData.get('description') as string,
+          description: (formData.get('description') as string) || null,
           start_date: startDate.toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
           location: formData.get('location') as TripLocation,
           gender: formData.get('gender') as TripGender,
-          spots: parseInt(formData.get('spots') as string),
-          website_url: formData.get('websiteUrl') as string || null,
+          spots: spotsValue ? parseInt(spotsValue) : null,
+          website_url: (formData.get('websiteUrl') as string) || null,
           brochure_image_path: brochureImagePath,
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
@@ -131,18 +132,18 @@ const AddTrip = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Trip Name</Label>
+                  <Label htmlFor="name">Trip Name *</Label>
                   <Input id="name" name="name" required />
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description (optional)</Label>
                   <Textarea id="description" name="description" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Start Date</Label>
+                    <Label>Start Date *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -168,7 +169,7 @@ const AddTrip = () => {
                   </div>
 
                   <div>
-                    <Label>End Date</Label>
+                    <Label>End Date *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -196,7 +197,7 @@ const AddTrip = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location">Location *</Label>
                     <Select name="location" required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select location" />
@@ -210,7 +211,7 @@ const AddTrip = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="gender">Gender</Label>
+                    <Label htmlFor="gender">Gender *</Label>
                     <Select name="gender" defaultValue="mixed">
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
@@ -225,13 +226,12 @@ const AddTrip = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="spots">Available Spots</Label>
+                  <Label htmlFor="spots">Available Spots (optional)</Label>
                   <Input
                     id="spots"
                     name="spots"
                     type="number"
                     min="1"
-                    required
                   />
                 </div>
 
@@ -241,7 +241,7 @@ const AddTrip = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="brochureImage">Brochure Image</Label>
+                  <Label htmlFor="brochureImage">Brochure Image (optional)</Label>
                   <Input
                     id="brochureImage"
                     type="file"
@@ -255,7 +255,7 @@ const AddTrip = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="gallery">Gallery Images (multiple)</Label>
+                  <Label htmlFor="gallery">Gallery Images (optional)</Label>
                   <Input
                     id="gallery"
                     type="file"
@@ -270,15 +270,17 @@ const AddTrip = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="organizerName">Organizer Name</Label>
+                  <Label htmlFor="organizerName">Organizer Name *</Label>
                   <Input id="organizerName" name="organizerName" required />
                 </div>
 
                 <div>
-                  <Label htmlFor="organizerContact">Organizer Contact</Label>
+                  <Label htmlFor="organizerContact">Organizer Contact *</Label>
                   <Input id="organizerContact" name="organizerContact" required />
                 </div>
               </div>
+
+              <div className="text-sm text-gray-500 mb-4">* Required fields</div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
