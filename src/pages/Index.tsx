@@ -118,11 +118,11 @@ const Index = () => {
           <div className="flex flex-wrap gap-2 mb-4">
             <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
               <MapPin className="w-4 h-4" />
-              <span className="text-sm capitalize">{trip.location}</span>
+              <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
             </div>
             <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
               <User className="w-4 h-4" />
-              <span className="text-sm capitalize">{trip.gender || 'Mixed'}</span>
+              <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
             </div>
           </div>
           <div className="flex gap-2">
@@ -357,42 +357,6 @@ const Index = () => {
             <FilterSection />
           </div>
         </div>
-      </div>
-
-      <div className="px-4 pb-20 max-w-7xl mx-auto">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <Skeleton className="w-full h-48" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-6 w-2/3" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredTrips && filteredTrips.length > 0 ? (
-          Object.entries(groupTripsByMonth(filteredTrips)).map(([month, monthTrips]) => (
-            <div key={month} className="mt-8 first:mt-4">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold mb-2">{month}</h2>
-                <div className="h-1 w-16 bg-[#FF6B00]"></div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {monthTrips.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} />
-                ))}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-center mt-8">
-            <h3 className="text-lg font-medium">No trips found</h3>
-            <p className="text-gray-600 mt-1">Try adjusting your filters</p>
-          </div>
-        )}
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
