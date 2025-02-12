@@ -496,7 +496,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="space-y-4">
-              <p className="text-lg font-medium">Contact Ari Gruen</p>
+              <p className="text-lg font-medium">Contact Rabbi Ari Gruen</p>
               <p className="text-gray-600">
                 <a href="mailto:agruen@olami.org" className="hover:text-primary">
                   agruen@olami.org
@@ -505,7 +505,7 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">+972 50-473-7438</span>
                 <a
-                  href="https://wa.me/97250473438"
+                  href="https://wa.me/+97250473438"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center bg-[#25D366] text-white px-3 py-1 rounded-full text-sm hover:bg-[#22BF5B] transition-colors"
