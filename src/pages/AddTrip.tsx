@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -213,29 +212,28 @@ const AddTrip = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="location">Location *</Label>
+                    <Label htmlFor="location">Destination *</Label>
                     <Select name="location" required>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select location" />
+                        <SelectValue placeholder="Select destination" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="israel">Israel</SelectItem>
-                        <SelectItem value="us">United States</SelectItem>
+                        <SelectItem value="united_states">United States</SelectItem>
                         <SelectItem value="international">International</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label htmlFor="gender">Gender *</Label>
+                    <Label htmlFor="gender">Single-Gender/Co-ed *</Label>
                     <Select name="gender" defaultValue="mixed">
                       <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
+                        <SelectValue placeholder="Select option" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="mixed">Mixed</SelectItem>
-                        <SelectItem value="male">Male Only</SelectItem>
-                        <SelectItem value="female">Female Only</SelectItem>
+                        <SelectItem value="mixed">Co-ed</SelectItem>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
