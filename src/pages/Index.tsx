@@ -291,14 +291,24 @@ const Index = () => {
         </div>
       </nav>
 
-      <div className="bg-[#FF6B00] text-white pt-20 pb-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-['Playfair_Display']">
-            Welcome to Olami Trip Finder
-          </h1>
-          <p className="text-lg md:text-xl max-w-3xl leading-relaxed">
-            If you're an Olami educator in North America, you've come to the right place to find comprehensive information about upcoming trips to maximize your students' growth and to build your learning and growth community. Your exploration of all that's available begins here!
-          </p>
+      <div className="relative">
+        <div className="absolute inset-0">
+          <img 
+            src="/lovable-uploads/16666368-d298-47be-9ef8-c608163578c5.png"
+            alt="Students enjoying their trip"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/80" />
+        </div>
+        <div className="relative pt-24 pb-16 px-4 md:pt-32 md:pb-24">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl md:text-5xl font-bold mb-6 font-['Playfair_Display'] text-white">
+              Welcome to Olami Trip Finder
+            </h1>
+            <p className="text-lg md:text-xl max-w-3xl leading-relaxed text-gray-100">
+              If you're an Olami educator in North America, you've come to the right place to find comprehensive information about upcoming trips to maximize your students' growth and to build your learning and growth community. Your exploration of all that's available begins here!
+            </p>
+          </div>
         </div>
       </div>
 
