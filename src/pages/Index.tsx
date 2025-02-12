@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -57,6 +56,7 @@ const Index = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     gender: {
       coed: true,
@@ -72,6 +72,21 @@ const Index = () => {
   const { data: trips, isLoading, error } = useQuery({
     queryKey: ['trips'],
     queryFn: fetchTrips,
+  });
+
+  const filteredTrips = trips?.filter(trip => {
+    const searchMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       trip.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       trip.organizer.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const genderMatch = (trip.gender === 'mixed' && filters.gender.coed) ||
+                       (trip.gender === 'male' && filters.gender.male) ||
+                       (trip.gender === 'female' && filters.gender.female);
+
+    const locationMatch = (trip.location === 'us' && filters.location.us) ||
+                         (trip.location === 'international' && filters.location.international);
+
+    return searchMatch && genderMatch && locationMatch;
   });
 
   const groupTripsByMonth = (trips: Trip[]) => {
@@ -130,6 +145,87 @@ const Index = () => {
     </div>
   );
 
+  const FilterSection = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 shadow-sm">
+      <div>
+        <h3 className="font-medium mb-3">Single-Gender/Co-ed</h3>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="coed"
+              checked={filters.gender.coed}
+              onCheckedChange={(checked) => 
+                setFilters(prev => ({
+                  ...prev,
+                  gender: { ...prev.gender, coed: checked === true }
+                }))
+              }
+            />
+            <label htmlFor="coed" className="text-sm">Co-ed</label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="male"
+              checked={filters.gender.male}
+              onCheckedChange={(checked) => 
+                setFilters(prev => ({
+                  ...prev,
+                  gender: { ...prev.gender, male: checked === true }
+                }))
+              }
+            />
+            <label htmlFor="male" className="text-sm">Male</label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="female"
+              checked={filters.gender.female}
+              onCheckedChange={(checked) => 
+                setFilters(prev => ({
+                  ...prev,
+                  gender: { ...prev.gender, female: checked === true }
+                }))
+              }
+            />
+            <label htmlFor="female" className="text-sm">Female</label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-medium mb-3">Destination</h3>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="us"
+              checked={filters.location.us}
+              onCheckedChange={(checked) => 
+                setFilters(prev => ({
+                  ...prev,
+                  location: { ...prev.location, us: checked === true }
+                }))
+              }
+            />
+            <label htmlFor="us" className="text-sm">US</label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="international"
+              checked={filters.location.international}
+              onCheckedChange={(checked) => 
+                setFilters(prev => ({
+                  ...prev,
+                  location: { ...prev.location, international: checked === true }
+                }))
+              }
+            />
+            <label htmlFor="international" className="text-sm">International</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -171,6 +267,8 @@ const Index = () => {
           <input
             type="text"
             placeholder="Search trips..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-10 pl-10 pr-4 bg-white rounded-full border-none shadow-sm text-sm"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -189,83 +287,34 @@ const Index = () => {
             </Button>
           </div>
           
-          <div className="hidden md:grid grid-cols-2 gap-6 bg-white p-4 shadow-sm">
-            <div>
-              <h3 className="font-medium mb-3">Single-Gender/Co-ed</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="coed"
-                    checked={filters.gender.coed}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        gender: { ...prev.gender, coed: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="coed" className="text-sm">Co-ed</label>
+          {isFilterOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+              <div className="bg-white rounded-t-xl h-[90vh] absolute bottom-0 left-0 right-0 overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4">
+                  <h2 className="text-lg font-medium">Filters</h2>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setIsFilterOpen(false)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="male"
-                    checked={filters.gender.male}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        gender: { ...prev.gender, male: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="male" className="text-sm">Male</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="female"
-                    checked={filters.gender.female}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        gender: { ...prev.gender, female: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="female" className="text-sm">Female</label>
+                <div className="p-4">
+                  <FilterSection />
+                  <Button 
+                    className="w-full mt-6"
+                    onClick={() => setIsFilterOpen(false)}
+                  >
+                    Apply Filters
+                  </Button>
                 </div>
               </div>
             </div>
-
-            <div>
-              <h3 className="font-medium mb-3">Destination</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="us"
-                    checked={filters.location.us}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        location: { ...prev.location, us: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="us" className="text-sm">US</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="international"
-                    checked={filters.location.international}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({
-                        ...prev,
-                        location: { ...prev.location, international: checked === true }
-                      }))
-                    }
-                  />
-                  <label htmlFor="international" className="text-sm">International</label>
-                </div>
-              </div>
-            </div>
+          )}
+          
+          <div className="hidden md:block">
+            <FilterSection />
           </div>
         </div>
       </div>
@@ -284,8 +333,8 @@ const Index = () => {
               </div>
             ))}
           </div>
-        ) : trips && trips.length > 0 ? (
-          Object.entries(groupTripsByMonth(trips)).map(([month, monthTrips]) => (
+        ) : filteredTrips && filteredTrips.length > 0 ? (
+          Object.entries(groupTripsByMonth(filteredTrips)).map(([month, monthTrips]) => (
             <div key={month} className="mt-8 first:mt-4">
               <div className="mb-6">
                 <h2 className="text-3xl font-bold mb-2">{month}</h2>
