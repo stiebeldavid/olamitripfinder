@@ -100,8 +100,10 @@ const Index = () => {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-primary">{trip.spots} spots left</span>
-          <Button variant="link" className="text-primary p-0">
+          {trip.spots != null && (
+            <span className="text-sm text-primary">{trip.spots} spots left</span>
+          )}
+          <Button variant="link" className="text-primary p-0 ml-auto">
             See Details
           </Button>
         </div>
@@ -288,10 +290,12 @@ const Index = () => {
                   <MapPin className="w-5 h-5 text-primary" />
                   <span className="text-gray-600 capitalize">{selectedTrip.location}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  <span className="text-gray-600">{selectedTrip.spots} spots available</span>
-                </div>
+                {selectedTrip.spots != null && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5 text-primary" />
+                    <span className="text-gray-600">{selectedTrip.spots} spots available</span>
+                  </div>
+                )}
               </div>
 
               {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && (
