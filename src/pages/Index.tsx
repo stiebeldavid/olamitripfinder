@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -7,6 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const getPublicUrl = (path: string | null | undefined): string => {
+  if (!path) return '/placeholder.svg';
+  const { data: { publicUrl } } = supabase.storage
+    .from('trip-photos')
+    .getPublicUrl(path);
+  return publicUrl;
+};
 
 const fetchTrips = async (): Promise<Trip[]> => {
   const { data, error } = await supabase
@@ -34,8 +43,8 @@ const fetchTrips = async (): Promise<Trip[]> => {
     gender: trip.gender,
     location: trip.location,
     spots: trip.spots,
-    brochureImage: trip.brochure_image_path,
-    gallery: trip.gallery?.map(g => g.image_path) || [],
+    brochureImage: getPublicUrl(trip.brochure_image_path),
+    gallery: trip.gallery?.map(g => getPublicUrl(g.image_path)) || [],
     videoLinks: trip.videos?.map(v => v.video_url) || []
   }));
 };
@@ -242,7 +251,7 @@ const Index = () => {
             </div>
             <div className="p-4">
               <img
-                src={selectedTrip.brochureImage || '/placeholder.svg'}
+                src={selectedTrip.brochureImage}
                 alt={selectedTrip.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
