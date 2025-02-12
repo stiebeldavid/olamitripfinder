@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -144,7 +145,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 pb-14">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
-          <div className="font-['Pacifico'] text-xl text-primary">TripTopia</div>
+          <div className="font-['Playfair_Display'] text-xl text-primary">Olami Trip Finder</div>
           <Link to="/add-trip">
             <Button size="sm" className="flex items-center gap-1">
               <Plus className="w-4 h-4" />
@@ -154,7 +155,18 @@ const Index = () => {
         </div>
       </nav>
 
-      <div className="mt-14 px-4 py-3 max-w-7xl mx-auto">
+      <div className="bg-[#FF6B00] text-white pt-20 pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-['Playfair_Display']">
+            Welcome to Olami Trip Finder
+          </h1>
+          <p className="text-lg md:text-xl max-w-3xl leading-relaxed">
+            If you're an Olami educator in North America, you've come to the right place to find comprehensive information about upcoming trips to maximize your students' growth and to build your learning and growth community. Your exploration of all that's available begins here!
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 px-4 py-3 max-w-7xl mx-auto">
         <div className="relative">
           <input
             type="text"
