@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -9,12 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+
 const getPublicUrl = (path: string | null | undefined): string => {
-  if (!path) return '/placeholder.svg';
+  if (!path) return DEFAULT_IMAGE;
   const { data: { publicUrl } } = supabase.storage
     .from('trip-photos')
     .getPublicUrl(path);
-  return publicUrl;
+  return publicUrl || DEFAULT_IMAGE;
 };
 
 const fetchTrips = async (): Promise<Trip[]> => {
@@ -76,7 +77,7 @@ const Index = () => {
       onClick={() => setSelectedTrip(trip)}
     >
       <img
-        src={trip.brochureImage || '/placeholder.svg'}
+        src={trip.brochureImage || DEFAULT_IMAGE}
         alt={trip.name}
         className="w-full h-48 object-cover"
       />
@@ -251,7 +252,7 @@ const Index = () => {
             </div>
             <div className="p-4">
               <img
-                src={selectedTrip.brochureImage}
+                src={selectedTrip.brochureImage || DEFAULT_IMAGE}
                 alt={selectedTrip.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
