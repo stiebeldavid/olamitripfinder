@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X } from "lucide-react";
@@ -6,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-// Temporary mock data
 const mockTrips = [
   {
     id: "1",
@@ -59,9 +57,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-14">
-      {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="flex items-center justify-between px-4 h-14">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="font-['Pacifico'] text-xl text-primary">TripTopia</div>
           <Link to="/add-trip">
             <Button size="sm" className="flex items-center gap-1">
@@ -72,8 +69,7 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Search and Filters */}
-      <div className="mt-14 px-4 py-3">
+      <div className="mt-14 px-4 py-3 max-w-7xl mx-auto">
         <div className="relative">
           <input
             type="text"
@@ -84,35 +80,50 @@ const Index = () => {
         </div>
 
         <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1 shadow-sm"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
-          </Button>
-          <Button variant="outline" size="sm" className="shadow-sm">
+          <div className="md:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 shadow-sm whitespace-nowrap"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              <Filter className="w-4 h-4" />
+              <span>Filters</span>
+            </Button>
+          </div>
+          <div className="hidden md:flex gap-2">
+            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
+              All Trips
+            </Button>
+            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
+              Mixed Gender
+            </Button>
+            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
+              Men Only
+            </Button>
+            <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
+              Women Only
+            </Button>
+          </div>
+          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
             All
           </Button>
-          <Button variant="default" size="sm" className="shadow-sm">
+          <Button variant="default" size="sm" className="shadow-sm whitespace-nowrap">
             US
           </Button>
-          <Button variant="outline" size="sm" className="shadow-sm">
+          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
             Israel
           </Button>
-          <Button variant="outline" size="sm" className="shadow-sm">
+          <Button variant="outline" size="sm" className="shadow-sm whitespace-nowrap">
             International
           </Button>
         </div>
       </div>
 
-      {/* Trip List */}
-      <div className="px-4 pb-20">
+      <div className="px-4 pb-20 max-w-7xl mx-auto">
         <div className="mt-4">
           <h2 className="text-lg font-medium mb-3">February 2025</h2>
-          <div className="grid gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {mockTrips
               .filter(trip => new Date(trip.startDate).getMonth() === 1)
               .map(trip => (
@@ -156,7 +167,7 @@ const Index = () => {
 
         <div className="mt-6">
           <h2 className="text-lg font-medium mb-3">March 2025</h2>
-          <div className="grid gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {mockTrips
               .filter(trip => new Date(trip.startDate).getMonth() === 2)
               .map(trip => (
@@ -199,8 +210,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
         <div className="grid grid-cols-4 h-14">
           <button className="flex flex-col items-center justify-center text-primary">
             <Home className="w-5 h-5" />
@@ -221,7 +231,6 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Trip Detail Modal */}
       {selectedTrip && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-t-xl h-[90vh] absolute bottom-0 left-0 right-0 overflow-y-auto">
