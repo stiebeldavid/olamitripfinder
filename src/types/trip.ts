@@ -1,6 +1,6 @@
 
 export type TripGender = "male" | "female" | "mixed";
-export type TripLocation = "israel" | "us" | "international";
+export type TripLocation = "united_states" | "international";
 
 export interface Trip {
   id: string;

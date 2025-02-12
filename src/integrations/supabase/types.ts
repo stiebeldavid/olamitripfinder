@@ -183,8 +183,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      trip_gender: "male" | "female" | "mixed"
-      trip_location: "israel" | "us" | "international"
+      trip_gender: "mixed" | "male" | "female"
+      trip_location: "united_states" | "international"
     }
     CompositeTypes: {
       [_ in never]: never

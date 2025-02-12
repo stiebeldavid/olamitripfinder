@@ -59,12 +59,12 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     gender: {
-      coed: true,
+      mixed: true,
       male: true,
       female: true,
     },
     location: {
-      us: true,
+      united_states: true,
       international: true,
     }
   });
@@ -79,11 +79,11 @@ const Index = () => {
                        trip.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                        trip.organizer.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const genderMatch = (trip.gender === 'mixed' && filters.gender.coed) ||
+    const genderMatch = (trip.gender === 'mixed' && filters.gender.mixed) ||
                        (trip.gender === 'male' && filters.gender.male) ||
                        (trip.gender === 'female' && filters.gender.female);
 
-    const locationMatch = (trip.location === 'us' && filters.location.us) ||
+    const locationMatch = (trip.location === 'united_states' && filters.location.united_states) ||
                          (trip.location === 'international' && filters.location.international);
 
     return searchMatch && genderMatch && locationMatch;
@@ -146,82 +146,120 @@ const Index = () => {
   );
 
   const FilterSection = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 shadow-sm">
-      <div>
-        <h3 className="font-medium mb-3">Single-Gender/Co-ed</h3>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="coed"
-              checked={filters.gender.coed}
-              onCheckedChange={(checked) => 
-                setFilters(prev => ({
-                  ...prev,
-                  gender: { ...prev.gender, coed: checked === true }
-                }))
-              }
-            />
-            <label htmlFor="coed" className="text-sm">Co-ed</label>
+    <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
+      <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 md:sticky md:top-20 md:self-start">
+        <div>
+          <h3 className="font-medium mb-4">Trip Type</h3>
+          <div className="flex flex-wrap gap-3">
+            <label className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Checkbox 
+                id="mixed"
+                checked={filters.gender.mixed}
+                onCheckedChange={(checked) => 
+                  setFilters(prev => ({
+                    ...prev,
+                    gender: { ...prev.gender, mixed: checked === true }
+                  }))
+                }
+              />
+              <span className="text-sm">Co-ed</span>
+            </label>
+            <label className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Checkbox 
+                id="male"
+                checked={filters.gender.male}
+                onCheckedChange={(checked) => 
+                  setFilters(prev => ({
+                    ...prev,
+                    gender: { ...prev.gender, male: checked === true }
+                  }))
+                }
+              />
+              <span className="text-sm">Male</span>
+            </label>
+            <label className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Checkbox 
+                id="female"
+                checked={filters.gender.female}
+                onCheckedChange={(checked) => 
+                  setFilters(prev => ({
+                    ...prev,
+                    gender: { ...prev.gender, female: checked === true }
+                  }))
+                }
+              />
+              <span className="text-sm">Female</span>
+            </label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="male"
-              checked={filters.gender.male}
-              onCheckedChange={(checked) => 
-                setFilters(prev => ({
-                  ...prev,
-                  gender: { ...prev.gender, male: checked === true }
-                }))
-              }
-            />
-            <label htmlFor="male" className="text-sm">Male</label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="female"
-              checked={filters.gender.female}
-              onCheckedChange={(checked) => 
-                setFilters(prev => ({
-                  ...prev,
-                  gender: { ...prev.gender, female: checked === true }
-                }))
-              }
-            />
-            <label htmlFor="female" className="text-sm">Female</label>
+        </div>
+
+        <div>
+          <h3 className="font-medium mb-4">Destination</h3>
+          <div className="flex flex-wrap gap-3">
+            <label className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Checkbox 
+                id="united_states"
+                checked={filters.location.united_states}
+                onCheckedChange={(checked) => 
+                  setFilters(prev => ({
+                    ...prev,
+                    location: { ...prev.location, united_states: checked === true }
+                  }))
+                }
+              />
+              <span className="text-sm">United States</span>
+            </label>
+            <label className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Checkbox 
+                id="international"
+                checked={filters.location.international}
+                onCheckedChange={(checked) => 
+                  setFilters(prev => ({
+                    ...prev,
+                    location: { ...prev.location, international: checked === true }
+                  }))
+                }
+              />
+              <span className="text-sm">International</span>
+            </label>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="font-medium mb-3">Destination</h3>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="us"
-              checked={filters.location.us}
-              onCheckedChange={(checked) => 
-                setFilters(prev => ({
-                  ...prev,
-                  location: { ...prev.location, us: checked === true }
-                }))
-              }
-            />
-            <label htmlFor="us" className="text-sm">US</label>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <Skeleton className="w-full h-48" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-6 w-2/3" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="international"
-              checked={filters.location.international}
-              onCheckedChange={(checked) => 
-                setFilters(prev => ({
-                  ...prev,
-                  location: { ...prev.location, international: checked === true }
-                }))
-              }
-            />
-            <label htmlFor="international" className="text-sm">International</label>
+        ) : filteredTrips && filteredTrips.length > 0 ? (
+          Object.entries(groupTripsByMonth(filteredTrips)).map(([month, monthTrips]) => (
+            <div key={month} className="mt-8 first:mt-0">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold mb-2">{month}</h2>
+                <div className="h-1 w-16 bg-[#FF6B00]"></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {monthTrips.map((trip) => (
+                  <TripCard key={trip.id} trip={trip} />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center mt-8">
+            <h3 className="text-lg font-medium">No trips found</h3>
+            <p className="text-gray-600 mt-1">Try adjusting your filters</p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
