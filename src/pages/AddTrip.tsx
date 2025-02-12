@@ -53,30 +53,40 @@ const AddTrip = () => {
           .from('trip-photos')
           .upload(`brochures/${Date.now()}-${brochureFile.name}`, brochureFile);
         
-        if (brochureError) throw brochureError;
+        if (brochureError) {
+          console.error('Brochure upload error:', brochureError);
+          throw new Error(`Failed to upload brochure: ${brochureError.message}`);
+        }
         brochureImagePath = brochureData.path;
       }
 
-      // Create trip record
+      // Create trip record with more detailed error logging
+      const tripData = {
+        name: formData.get('name') as string,
+        description: (formData.get('description') as string) || null,
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        location: formData.get('location') as TripLocation,
+        gender: formData.get('gender') as TripGender,
+        spots: spotsValue ? parseInt(spotsValue) : null,
+        website_url: (formData.get('websiteUrl') as string) || null,
+        brochure_image_path: brochureImagePath,
+        organizer_name: formData.get('organizerName') as string,
+        organizer_contact: formData.get('organizerContact') as string,
+      };
+
+      console.log('Attempting to create trip with data:', tripData);
+
       const { data: trip, error: tripError } = await supabase
         .from('trips')
-        .insert({
-          name: formData.get('name') as string,
-          description: (formData.get('description') as string) || null,
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
-          location: formData.get('location') as TripLocation,
-          gender: formData.get('gender') as TripGender,
-          spots: spotsValue ? parseInt(spotsValue) : null,
-          website_url: (formData.get('websiteUrl') as string) || null,
-          brochure_image_path: brochureImagePath,
-          organizer_name: formData.get('organizerName') as string,
-          organizer_contact: formData.get('organizerContact') as string,
-        })
+        .insert(tripData)
         .select()
         .single();
 
-      if (tripError) throw tripError;
+      if (tripError) {
+        console.error('Trip creation error:', tripError);
+        throw new Error(`Failed to create trip: ${tripError.message}`);
+      }
 
       // Upload gallery images if any
       if (galleryFiles.length > 0) {
@@ -85,7 +95,10 @@ const AddTrip = () => {
             .from('trip-photos')
             .upload(`gallery/${Date.now()}-${file.name}`, file);
           
-          if (imageError) throw imageError;
+          if (imageError) {
+            console.error('Gallery image upload error:', imageError);
+            throw new Error(`Failed to upload gallery image: ${imageError.message}`);
+          }
 
           const { error: galleryError } = await supabase
             .from('trip_gallery')
@@ -94,7 +107,10 @@ const AddTrip = () => {
               image_path: imageData.path,
             });
           
-          if (galleryError) throw galleryError;
+          if (galleryError) {
+            console.error('Gallery record creation error:', galleryError);
+            throw new Error(`Failed to create gallery record: ${galleryError.message}`);
+          }
         });
 
         await Promise.all(galleryPromises);
@@ -110,7 +126,7 @@ const AddTrip = () => {
       console.error('Error creating trip:', error);
       toast({
         title: "Error",
-        description: "Failed to create trip. Please try again.",
+        description: error.message || "Failed to create trip. Please try again.",
         variant: "destructive",
       });
     } finally {
