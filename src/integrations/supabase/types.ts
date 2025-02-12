@@ -9,6 +9,64 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      trip_gallery: {
+        Row: {
+          created_at: string
+          id: string
+          image_path: string
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_path: string
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_path?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_gallery_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_videos: {
+        Row: {
+          created_at: string
+          id: string
+          trip_id: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trip_id: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trip_id?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_videos_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       TripInfo: {
         Row: {
           brochure_image_id: number | null
@@ -66,6 +124,57 @@ export type Database = {
         }
         Relationships: []
       }
+      trips: {
+        Row: {
+          brochure_image_path: string | null
+          created_at: string
+          description: string | null
+          end_date: string
+          gender: Database["public"]["Enums"]["trip_gender"]
+          id: string
+          location: Database["public"]["Enums"]["trip_location"]
+          name: string
+          organizer_contact: string
+          organizer_name: string
+          spots: number
+          start_date: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          brochure_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          end_date: string
+          gender?: Database["public"]["Enums"]["trip_gender"]
+          id?: string
+          location: Database["public"]["Enums"]["trip_location"]
+          name: string
+          organizer_contact: string
+          organizer_name: string
+          spots: number
+          start_date: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          brochure_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          gender?: Database["public"]["Enums"]["trip_gender"]
+          id?: string
+          location?: Database["public"]["Enums"]["trip_location"]
+          name?: string
+          organizer_contact?: string
+          organizer_name?: string
+          spots?: number
+          start_date?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -74,7 +183,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      trip_gender: "male" | "female" | "mixed"
+      trip_location: "israel" | "us" | "international"
     }
     CompositeTypes: {
       [_ in never]: never
