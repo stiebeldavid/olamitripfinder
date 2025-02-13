@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -54,12 +55,13 @@ const fetchTrips = async (): Promise<Trip[]> => {
 };
 
 const Index = () => {
+  const location = useLocation();
+  const { toast } = useToast();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
   const [filters, setFilters] = useState({
     gender: {
       mixed: true,
@@ -77,6 +79,17 @@ const Index = () => {
     queryKey: ['trips'],
     queryFn: fetchTrips,
   });
+
+  useEffect(() => {
+    const tripIdMatch = location.pathname.match(/\/trip\/(\d+)/);
+    if (tripIdMatch && trips) {
+      const tripId = parseInt(tripIdMatch[1]);
+      const trip = trips.find(t => t.id === tripId);
+      if (trip) {
+        setSelectedTrip(trip);
+      }
+    }
+  }, [location.pathname, trips]);
 
   const filteredTrips = trips?.filter(trip => {
     const searchMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -423,7 +436,8 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={async () => {
-                            const shareText = `Check out this trip: ${selectedTrip.name}`;
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
+                            const shareText = `Check out this trip: ${selectedTrip.name}\n${tripUrl}`;
                             await navigator.clipboard.writeText(shareText);
                             toast({
                               description: "Copied to clipboard!",
@@ -437,7 +451,8 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            const shareText = encodeURIComponent(`Check out this trip: ${selectedTrip.name}`);
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
+                            const shareText = encodeURIComponent(`Check out this trip: ${selectedTrip.name}\n${tripUrl}`);
                             window.open(
                               `https://wa.me/?text=${shareText}`,
                               "_blank",
@@ -455,9 +470,9 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            const shareUrl = encodeURIComponent(window.location.href);
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
                             window.open(
-                              `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+                              `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(tripUrl)}`,
                               "_blank",
                               "noopener noreferrer"
                             );
