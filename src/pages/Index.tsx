@@ -434,7 +434,7 @@ const Index = () => {
               {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
                 <div className="mt-8">
                   <h4 className="font-medium text-lg mb-4">Photos from past trips</h4>
-                  <div className="w-full">
+                  <div className="hidden md:block w-full">
                     <Carousel className="w-full">
                       <CarouselContent>
                         {selectedTrip.gallery.map((image, index) => (
@@ -456,24 +456,21 @@ const Index = () => {
                       <CarouselNext />
                     </Carousel>
                   </div>
-                </div>
-              )}
-
-              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
-                <div className="mt-4 grid grid-cols-6 gap-2">
-                  {selectedTrip.gallery.map((image, index) => (
-                    <div 
-                      key={index}
-                      className="aspect-square rounded-lg overflow-hidden cursor-pointer"
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <img
-                        src={image}
-                        alt={`Trip photo ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-2 md:hidden gap-2">
+                    {selectedTrip.gallery.map((image, index) => (
+                      <div 
+                        key={index}
+                        className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                        <img
+                          src={image}
+                          alt={`Trip photo ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
