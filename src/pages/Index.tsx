@@ -341,27 +341,6 @@ const Index = () => {
         </div>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden">
-        <div className="grid grid-cols-4 h-14">
-          <button className="flex flex-col items-center justify-center text-primary">
-            <Home className="w-5 h-5" />
-            <span className="text-xs mt-0.5">Home</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-gray-400">
-            <Search className="w-5 h-5" />
-            <span className="text-xs mt-0.5">Search</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-gray-400">
-            <Heart className="w-5 h-5" />
-            <span className="text-xs mt-0.5">Saved</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-gray-400">
-            <User className="w-5 h-5" />
-            <span className="text-xs mt-0.5">Profile</span>
-          </button>
-        </div>
-      </nav>
-
       {selectedTrip && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
