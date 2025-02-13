@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -433,21 +434,46 @@ const Index = () => {
               {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
                 <div className="mt-8">
                   <h4 className="font-medium text-lg mb-4">Photos from past trips</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {selectedTrip.gallery.map((image, index) => (
-                      <div 
-                        key={index}
-                        className="aspect-square rounded-lg overflow-hidden cursor-pointer"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                        <img
-                          src={image}
-                          alt={`Trip photo ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    ))}
+                  <div className="w-full">
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {selectedTrip.gallery.map((image, index) => (
+                          <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                            <div 
+                              className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+                              onClick={() => setSelectedImage(image)}
+                            >
+                              <img
+                                src={image}
+                                alt={`Trip photo ${index + 1}`}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                              />
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
                   </div>
+                </div>
+              )}
+
+              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
+                <div className="mt-4 grid grid-cols-6 gap-2">
+                  {selectedTrip.gallery.map((image, index) => (
+                    <div 
+                      key={index}
+                      className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+                      onClick={() => setSelectedImage(image)}
+                    >
+                      <img
+                        src={image}
+                        alt={`Trip photo ${index + 1}`}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
