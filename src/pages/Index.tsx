@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -57,6 +57,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
 
 const Index = () => {
   const location = useLocation();
+  const params = useParams();
   const { toast } = useToast();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -82,15 +83,14 @@ const Index = () => {
   });
 
   useEffect(() => {
-    const tripIdMatch = location.pathname.match(/\/trip\/(\d+)/);
-    if (tripIdMatch && trips) {
-      const tripId = parseInt(tripIdMatch[1]);
+    if (trips && params.tripId) {
+      const tripId = parseInt(params.tripId);
       const trip = trips.find(t => t.trip_id === tripId);
       if (trip) {
         setSelectedTrip(trip);
       }
     }
-  }, [location.pathname, trips]);
+  }, [params.tripId, trips]);
 
   const filteredTrips = trips?.filter(trip => {
     const searchMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

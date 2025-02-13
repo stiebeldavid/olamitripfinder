@@ -19,6 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/trip/:tripId" element={<Index />} />
           <Route path="/add-trip" element={<AddTrip />} />
           <Route path="/edit-trip" element={<EditTrip />} />
           <Route path="*" element={<NotFound />} />
