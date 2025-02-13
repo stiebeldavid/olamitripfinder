@@ -106,7 +106,7 @@ const Index = () => {
       className="relative group overflow-hidden"
       onClick={() => setSelectedTrip(trip)}
     >
-      <div className="relative h-[280px]">
+      <div className="relative h-[140px] md:h-[280px]">
         <img
           src={trip.brochureImage || DEFAULT_IMAGE}
           alt={trip.name}
@@ -114,8 +114,8 @@ const Index = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="text-2xl font-bold mb-3">{trip.name}</h3>
-          <div className="flex flex-wrap gap-2 mb-4">
+          <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
+          <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
             <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
               <MapPin className="w-4 h-4" />
               <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
