@@ -349,7 +349,14 @@ const Index = () => {
       </div>
 
       {selectedTrip && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedTrip(null);
+            }
+          }}
+        >
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
             <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
               <h2 className="text-lg font-medium">Trip Details</h2>
