@@ -305,14 +305,26 @@ const Index = () => {
             <h1 className="text-3xl md:text-5xl font-bold mb-6 font-['Playfair_Display'] text-white">
               Welcome to Olami Trip Finder
             </h1>
-            <p className="text-lg md:text-xl max-w-3xl leading-relaxed text-gray-100">
+            <p className="text-lg md:text-xl max-w-3xl leading-relaxed text-gray-100 mb-8">
               If you're an Olami educator in North America, you've come to the right place to find comprehensive information about upcoming trips to maximize your students' growth and to build your learning and growth community. Your exploration of all that's available begins here!
             </p>
+            <Button 
+              size="lg"
+              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
+              onClick={() => {
+                const searchSection = document.getElementById('search-section');
+                if (searchSection) {
+                  searchSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              Find Trips
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 px-4 py-3 max-w-7xl mx-auto">
+      <div id="search-section" className="mt-8 px-4 py-3 max-w-7xl mx-auto">
         <div className="relative">
           <input
             type="text"
@@ -325,47 +337,7 @@ const Index = () => {
         </div>
 
         <div className="flex flex-col gap-4 mt-4">
-          <div className="md:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 shadow-sm whitespace-nowrap"
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-            >
-              <Filter className="w-4 h-4" />
-              <span>Filters</span>
-            </Button>
-          </div>
-          
-          {isFilterOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-              <div className="bg-white rounded-t-xl h-[90vh] absolute bottom-0 left-0 right-0 overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4">
-                  <h2 className="text-lg font-medium">Filters</h2>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setIsFilterOpen(false)}
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <FilterSection />
-                  <Button 
-                    className="w-full mt-6"
-                    onClick={() => setIsFilterOpen(false)}
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="hidden md:block">
-            <FilterSection />
-          </div>
+          <FilterSection />
         </div>
       </div>
 
