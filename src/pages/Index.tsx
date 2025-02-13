@@ -313,8 +313,13 @@ const Index = () => {
               className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
               onClick={() => {
                 const searchSection = document.getElementById('search-section');
+                const navHeight = 56; // height of the nav bar (14 * 4 = 56px)
                 if (searchSection) {
-                  searchSection.scrollIntoView({ behavior: 'smooth' });
+                  const elementPosition = searchSection.getBoundingClientRect().top + window.scrollY;
+                  window.scrollTo({
+                    top: elementPosition - navHeight,
+                    behavior: 'smooth'
+                  });
                 }
               }}
             >
