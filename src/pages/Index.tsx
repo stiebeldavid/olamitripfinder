@@ -9,7 +9,7 @@ import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -59,6 +59,7 @@ const Index = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
   const [filters, setFilters] = useState({
     gender: {
       mixed: true,
