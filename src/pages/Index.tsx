@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Share2, Facebook, Phone as WhatsApp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import type { Trip } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useToast } from "@/components/ui/use-toast";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -414,9 +415,53 @@ const Index = () => {
                     >
                       Contact Organizer
                     </Button>
-                    <Button variant="outline" className="w-full">
-                      Share Trip
-                    </Button>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-500">Share Trip</p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={async () => {
+                            const shareText = `Check out this trip: ${selectedTrip.name}`;
+                            await navigator.clipboard.writeText(shareText);
+                            toast({
+                              description: "Copied to clipboard!",
+                              duration: 2000,
+                            });
+                          }}
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            const shareText = encodeURIComponent(`Check out this trip: ${selectedTrip.name}`);
+                            window.open(
+                              `https://wa.me/?text=${shareText}`,
+                              "_blank",
+                              "noopener noreferrer"
+                            );
+                          }}
+                        >
+                          <WhatsApp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            const shareUrl = encodeURIComponent(window.location.href);
+                            window.open(
+                              `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+                              "_blank",
+                              "noopener noreferrer"
+                            );
+                          }}
+                        >
+                          <Facebook className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
