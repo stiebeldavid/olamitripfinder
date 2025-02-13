@@ -391,9 +391,9 @@ const Index = () => {
       </nav>
 
       {selectedTrip && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-t-xl h-[90vh] absolute bottom-0 left-0 right-0 overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
+            <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
               <h2 className="text-lg font-medium">Trip Details</h2>
               <Button
                 size="icon"
@@ -403,54 +403,64 @@ const Index = () => {
                 <X className="w-5 h-5" />
               </Button>
             </div>
-            <div className="p-4">
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                <div className="col-span-4">
+            <div className="overflow-y-auto p-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-medium">{selectedTrip.name}</h3>
+                  <p className="text-gray-600">{selectedTrip.description}</p>
+
+                  <div className="grid gap-3">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <span className="text-gray-600">
+                        {format(new Date(selectedTrip.startDate), "MMM d")} -{" "}
+                        {format(new Date(selectedTrip.endDate), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      <span className="text-gray-600 capitalize">{selectedTrip.location.replace('_', ' ')}</span>
+                    </div>
+                    {selectedTrip.spots != null && (
+                      <div className="flex items-center gap-2">
+                        <User className="w-5 h-5 text-primary" />
+                        <span className="text-gray-600">{selectedTrip.spots} spots available</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2 pt-4">
+                    {selectedTrip.websiteUrl && (
+                      <Button 
+                        className="w-full" 
+                        onClick={() => window.open(selectedTrip.websiteUrl, "_blank")}
+                      >
+                        Learn More
+                      </Button>
+                    )}
+                    <Button variant="outline" className="w-full">
+                      Contact Organizer
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      Share Trip
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
                   <img
                     src={selectedTrip.brochureImage || DEFAULT_IMAGE}
                     alt={selectedTrip.name}
-                    className="w-full h-48 object-cover rounded-lg cursor-pointer"
+                    className="w-full rounded-lg cursor-pointer mb-6"
                     onClick={() => setSelectedImage(selectedTrip.brochureImage || DEFAULT_IMAGE)}
                   />
                 </div>
-                {selectedTrip.gallery?.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`Trip image ${index + 1}`}
-                    className="w-full aspect-square object-cover rounded-lg cursor-pointer"
-                    onClick={() => setSelectedImage(image)}
-                  />
-                ))}
-              </div>
-              
-              <h3 className="text-xl font-medium mb-2">{selectedTrip.name}</h3>
-              <p className="text-gray-600 mb-4">{selectedTrip.description}</p>
-
-              <div className="grid gap-3 mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  <span className="text-gray-600">
-                    {format(new Date(selectedTrip.startDate), "MMM d")} -{" "}
-                    {format(new Date(selectedTrip.endDate), "MMM d, yyyy")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <span className="text-gray-600 capitalize">{selectedTrip.location}</span>
-                </div>
-                {selectedTrip.spots != null && (
-                  <div className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-primary" />
-                    <span className="text-gray-600">{selectedTrip.spots} spots available</span>
-                  </div>
-                )}
               </div>
 
               {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="font-medium mb-2">Videos</h4>
-                  <div className="space-y-2">
+                <div className="mt-8">
+                  <h4 className="font-medium text-lg mb-4">Videos</h4>
+                  <div className="space-y-4">
                     {selectedTrip.videoLinks.map((video, index) => (
                       <div key={index} className="aspect-video">
                         <iframe
@@ -464,22 +474,26 @@ const Index = () => {
                 </div>
               )}
 
-              <div className="grid gap-2">
-                {selectedTrip.websiteUrl && (
-                  <Button 
-                    className="w-full" 
-                    onClick={() => window.open(selectedTrip.websiteUrl, "_blank")}
-                  >
-                    Learn More
-                  </Button>
-                )}
-                <Button variant="outline" className="w-full">
-                  Contact Organizer
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Share Trip
-                </Button>
-              </div>
+              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
+                <div className="mt-8">
+                  <h4 className="font-medium text-lg mb-4">Photos from past trips</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {selectedTrip.gallery.map((image, index) => (
+                      <div 
+                        key={index}
+                        className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                        <img
+                          src={image}
+                          alt={`Trip photo ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
