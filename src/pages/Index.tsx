@@ -84,7 +84,7 @@ const Index = () => {
     const tripIdMatch = location.pathname.match(/\/trip\/(\d+)/);
     if (tripIdMatch && trips) {
       const tripId = parseInt(tripIdMatch[1]);
-      const trip = trips.find(t => t.id === tripId);
+      const trip = trips.find(t => t.trip_id === tripId);
       if (trip) {
         setSelectedTrip(trip);
       }
@@ -423,7 +423,7 @@ const Index = () => {
                       className="w-full"
                       onClick={() => {
                         const subject = encodeURIComponent(`Olami Trip Finder - ${selectedTrip.name}`);
-                        const body = encodeURIComponent(`Hi ${selectedTrip.organizer.name}, I'm interested in the ${selectedTrip.name} trip.`);
+                        const body = encodeURIComponent(`Hi ${selectedTrip.organizer.name},\n\nI'm interested in the ${selectedTrip.name} trip.\n\nTrip details: ${window.location.origin}/trip/${selectedTrip.trip_id}`);
                         window.location.href = `mailto:${selectedTrip.organizer.contact}?subject=${subject}&body=${body}`;
                       }}
                     >
@@ -436,7 +436,7 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={async () => {
-                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.trip_id}`;
                             const shareText = `Check out this trip: ${selectedTrip.name}\n${tripUrl}`;
                             await navigator.clipboard.writeText(shareText);
                             toast({
@@ -451,7 +451,7 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.trip_id}`;
                             const shareText = encodeURIComponent(`Check out this trip: ${selectedTrip.name}\n${tripUrl}`);
                             window.open(
                               `https://wa.me/?text=${shareText}`,
@@ -470,7 +470,7 @@ const Index = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.id}`;
+                            const tripUrl = `${window.location.origin}/trip/${selectedTrip.trip_id}`;
                             window.open(
                               `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(tripUrl)}`,
                               "_blank",
