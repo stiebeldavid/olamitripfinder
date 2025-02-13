@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Share2, Facebook, Phone as WhatsApp } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -445,7 +445,11 @@ const Index = () => {
                             );
                           }}
                         >
-                          <WhatsApp className="w-4 h-4" />
+                          <img 
+                            src="/lovable-uploads/d50e0415-da2b-47dc-80c7-2f4b06069346.png" 
+                            alt="Share on WhatsApp"
+                            className="w-4 h-4"
+                          />
                         </Button>
                         <Button
                           variant="outline"
@@ -459,7 +463,11 @@ const Index = () => {
                             );
                           }}
                         >
-                          <Facebook className="w-4 h-4" />
+                          <img 
+                            src="/lovable-uploads/823bbda7-ae49-431f-a322-06cb6a1e17e5.png" 
+                            alt="Share on Facebook"
+                            className="w-4 h-4"
+                          />
                         </Button>
                       </div>
                     </div>

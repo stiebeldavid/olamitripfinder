@@ -138,6 +138,7 @@ export type Database = {
           organizer_name: string
           spots: number | null
           start_date: string
+          trip_id: number
           updated_at: string
           website_url: string | null
         }
@@ -154,6 +155,7 @@ export type Database = {
           organizer_name: string
           spots?: number | null
           start_date: string
+          trip_id?: number
           updated_at?: string
           website_url?: string | null
         }
@@ -170,6 +172,7 @@ export type Database = {
           organizer_name?: string
           spots?: number | null
           start_date?: string
+          trip_id?: number
           updated_at?: string
           website_url?: string | null
         }
