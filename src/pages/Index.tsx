@@ -398,12 +398,20 @@ const Index = () => {
                     {selectedTrip.websiteUrl && (
                       <Button 
                         className="w-full" 
-                        onClick={() => window.open(selectedTrip.websiteUrl, "_blank")}
+                        onClick={() => window.open(selectedTrip.websiteUrl, "_blank", "noopener noreferrer")}
                       >
                         Learn More
                       </Button>
                     )}
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        const subject = encodeURIComponent(`Olami Trip Finder - ${selectedTrip.name}`);
+                        const body = encodeURIComponent(`Hi ${selectedTrip.organizer.name}, I'm interested in the ${selectedTrip.name} trip.`);
+                        window.location.href = `mailto:${selectedTrip.organizer.contact}?subject=${subject}&body=${body}`;
+                      }}
+                    >
                       Contact Organizer
                     </Button>
                     <Button variant="outline" className="w-full">
