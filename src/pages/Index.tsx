@@ -36,6 +36,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
   
   return data.map(trip => ({
     id: trip.id,
+    trip_id: trip.trip_id,  // Add this line to include trip_id in the mapping
     name: trip.name,
     description: trip.description || "",
     startDate: trip.start_date,
