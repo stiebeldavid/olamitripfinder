@@ -4,6 +4,7 @@ export type TripLocation = "united_states" | "international";
 
 export interface Trip {
   id: string;
+  trip_id: number;  // Adding this field to match the database structure
   name: string;
   description: string;
   startDate: string;
