@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -69,6 +69,7 @@ const Index = () => {
       international: true,
     }
   });
+  const [showMobileGallery, setShowMobileGallery] = useState(false);
 
   const { data: trips, isLoading, error } = useQuery({
     queryKey: ['trips'],
@@ -434,6 +435,33 @@ const Index = () => {
               {selectedTrip.gallery && selectedTrip.gallery.length > 0 && (
                 <div className="mt-8">
                   <h4 className="font-medium text-lg mb-4">Photos from past trips</h4>
+                  <div className="block md:hidden">
+                    <Button
+                      variant="outline"
+                      className="w-full mb-4"
+                      onClick={() => setShowMobileGallery(!showMobileGallery)}
+                    >
+                      <Image className="w-4 h-4 mr-2" />
+                      {showMobileGallery ? 'Hide Photos' : `See ${selectedTrip.gallery.length} Previous Trip Photos`}
+                    </Button>
+                    {showMobileGallery && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedTrip.gallery.map((image, index) => (
+                          <div 
+                            key={index}
+                            className="aspect-square rounded-lg overflow-hidden cursor-pointer"
+                            onClick={() => setSelectedImage(image)}
+                          >
+                            <img
+                              src={image}
+                              alt={`Trip photo ${index + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="hidden md:block w-full">
                     <Carousel className="w-full">
                       <CarouselContent>
@@ -455,21 +483,6 @@ const Index = () => {
                       <CarouselPrevious />
                       <CarouselNext />
                     </Carousel>
-                  </div>
-                  <div className="grid grid-cols-2 md:hidden gap-2">
-                    {selectedTrip.gallery.map((image, index) => (
-                      <div 
-                        key={index}
-                        className="aspect-square rounded-lg overflow-hidden cursor-pointer"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                        <img
-                          src={image}
-                          alt={`Trip photo ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}
