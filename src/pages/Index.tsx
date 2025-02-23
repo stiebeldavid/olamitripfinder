@@ -378,7 +378,7 @@ const Index = () => {
         >
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
             <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
-              <h2 className="text-2xl md:text-3xl font-founders-x-condensed font-medium">{selectedTrip.name}</h2>
+              <h2 className="text-3xl md:text-5xl font-founders-x-condensed font-medium">{selectedTrip.name}</h2>
               <Button
                 size="icon"
                 variant="ghost"
