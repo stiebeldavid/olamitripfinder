@@ -5,6 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Select,
   SelectContent,
@@ -35,6 +46,7 @@ const EditTrip = () => {
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: trip, isLoading, error } = useQuery({
     queryKey: ['trip', tripId],
@@ -239,6 +251,34 @@ const EditTrip = () => {
         description: "Failed to remove brochure image",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .update({ show_trip: 'Deleted' })
+        .eq('trip_id', parseInt(tripId as string));
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Trip has been deleted",
+      });
+
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete trip. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -512,18 +552,53 @@ const EditTrip = () => {
                     required 
                   />
                 </div>
-              </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating Trip...
-                  </>
-                ) : (
-                  "Update Trip"
-                )}
-              </Button>
+                <div className="space-y-4">
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Updating Trip...
+                      </>
+                    ) : (
+                      "Update Trip"
+                    )}
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full" type="button">
+                        Delete Trip
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action will delete this trip. The trip will no longer be visible to users.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {isDeleting ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            "Delete Trip"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
             </form>
           </div>
         </div>
