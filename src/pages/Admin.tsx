@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil, Copy } from "lucide-react";
 import { Trip } from "@/types/trip";
 import {
   Select,
@@ -20,6 +20,7 @@ import {
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const { toast } = useToast();
 
   const { data: trips, refetch } = useQuery({
@@ -51,7 +52,7 @@ export default function Admin() {
         show_trip: trip.show_trip
       })) as Trip[];
     },
-    enabled: isAuthenticated // Only fetch when authenticated
+    enabled: isAuthenticated
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -88,7 +89,116 @@ export default function Admin() {
         title: "Success",
         description: "Trip status updated successfully",
       });
-      refetch(); // Refresh the data
+      refetch();
+    }
+  };
+
+  const duplicateTrip = async (trip: Trip) => {
+    try {
+      setIsDuplicating(true);
+
+      // Get the next available trip_id
+      const { data: maxTripId } = await supabase
+        .from('trips')
+        .select('trip_id')
+        .order('trip_id', { ascending: false })
+        .limit(1)
+        .single();
+
+      const newTripId = (maxTripId?.trip_id || 0) + 1;
+
+      // Copy brochure image if it exists
+      let newBrochureImagePath = null;
+      if (trip.brochureImage) {
+        const fileName = trip.brochureImage.split('/').pop();
+        if (fileName) {
+          const { data: brochureFile } = await supabase.storage
+            .from('trip-photos')
+            .download(`brochures/${fileName}`);
+
+          if (brochureFile) {
+            const newFileName = `brochures/${Date.now()}-${fileName}`;
+            const { data: uploadedFile } = await supabase.storage
+              .from('trip-photos')
+              .upload(newFileName, brochureFile);
+
+            if (uploadedFile) {
+              newBrochureImagePath = newFileName;
+            }
+          }
+        }
+      }
+
+      // Create the new trip
+      const { data: newTrip, error: tripError } = await supabase
+        .from('trips')
+        .insert({
+          trip_id: newTripId,
+          name: `${trip.name} - Copy`,
+          description: trip.description,
+          start_date: trip.startDate,
+          end_date: trip.endDate,
+          location: trip.location,
+          gender: trip.gender,
+          spots: trip.spots,
+          website_url: trip.websiteUrl,
+          brochure_image_path: newBrochureImagePath,
+          organizer_name: trip.organizer.name,
+          organizer_contact: trip.organizer.contact,
+          show_trip: 'Hidden' // Start as hidden by default
+        })
+        .select()
+        .single();
+
+      if (tripError) throw tripError;
+
+      // Get and copy gallery images
+      const { data: galleryImages } = await supabase
+        .from('trip_gallery')
+        .select('image_path')
+        .eq('trip_id', trip.id);
+
+      if (galleryImages && galleryImages.length > 0) {
+        for (const image of galleryImages) {
+          const fileName = image.image_path.split('/').pop();
+          if (fileName) {
+            const { data: galleryFile } = await supabase.storage
+              .from('trip-photos')
+              .download(`gallery/${fileName}`);
+
+            if (galleryFile) {
+              const newFileName = `gallery/${Date.now()}-${fileName}`;
+              const { data: uploadedFile } = await supabase.storage
+                .from('trip-photos')
+                .upload(newFileName, galleryFile);
+
+              if (uploadedFile) {
+                await supabase
+                  .from('trip_gallery')
+                  .insert({
+                    trip_id: newTrip.id,
+                    image_path: newFileName
+                  });
+              }
+            }
+          }
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Trip duplicated successfully",
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error duplicating trip:', error);
+      toast({
+        title: "Error",
+        description: "Failed to duplicate trip",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -186,11 +296,25 @@ export default function Admin() {
                   </Select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <Link to={`/edit-trip/${trip.trip_id}`}>
-                    <Button variant="ghost" size="sm">
-                      <Pencil className="h-4 w-4" />
+                  <div className="flex items-center space-x-2">
+                    <Link to={`/edit-trip/${trip.trip_id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => duplicateTrip(trip)}
+                      disabled={isDuplicating}
+                    >
+                      {isDuplicating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
                     </Button>
-                  </Link>
+                  </div>
                 </td>
               </tr>
             ))}
