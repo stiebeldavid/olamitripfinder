@@ -17,7 +17,25 @@ export default function Index() {
         .order('start_date', { ascending: true });
       
       if (error) throw error;
-      return data as Trip[];
+      
+      // Transform the data to match our Trip interface
+      return data.map((trip) => ({
+        id: trip.id,
+        trip_id: trip.trip_id,
+        name: trip.name,
+        description: trip.description,
+        startDate: trip.start_date,
+        endDate: trip.end_date,
+        websiteUrl: trip.website_url,
+        organizer: {
+          name: trip.organizer_name,
+          contact: trip.organizer_contact
+        },
+        gender: trip.gender,
+        location: trip.location,
+        spots: trip.spots,
+        brochureImage: trip.brochure_image_path
+      })) as Trip[];
     },
   });
 
@@ -58,8 +76,8 @@ export default function Index() {
                 {trip.description || "No description available"}
               </p>
               <div className="space-y-2 text-sm text-gray-500">
-                <p>Start: {new Date(trip.start_date).toLocaleDateString()}</p>
-                <p>End: {new Date(trip.end_date).toLocaleDateString()}</p>
+                <p>Start: {new Date(trip.startDate).toLocaleDateString()}</p>
+                <p>End: {new Date(trip.endDate).toLocaleDateString()}</p>
                 <p>Location: {trip.location}</p>
                 <p>Gender: {trip.gender}</p>
                 {trip.spots && <p>Available Spots: {trip.spots}</p>}
