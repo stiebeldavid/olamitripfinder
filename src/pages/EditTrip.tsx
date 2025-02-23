@@ -442,7 +442,7 @@ const EditTrip = () => {
                             await handleDeleteBrochure();
                           }
                         }}
-                        showDelete={!brochurePreview}
+                        showDelete={!brochurePreview && Boolean(trip.brochure_image_path)}
                       />
                     </div>
                   )}
