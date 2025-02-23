@@ -301,10 +301,16 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 pb-14">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
-          <div className="font-founders-x-condensed text-xl text-primary">Olami Trip Finder</div>
+          <div className="h-8 flex items-center">
+            <img 
+              src="/lovable-uploads/c0777c81-bd25-4b7f-8afb-3885843e912b.png"
+              alt="Olami Trip Finder"
+              className="h-full w-auto"
+            />
+          </div>
           <Button 
             size="sm" 
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 ml-4"
             onClick={() => setShowContactInfo(true)}
           >
             Contact Us
