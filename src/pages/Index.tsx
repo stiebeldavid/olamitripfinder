@@ -378,7 +378,7 @@ const Index = () => {
         >
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
             <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
-              <h2 className="text-lg font-medium font-founders">Trip Details</h2>
+              <h2 className="text-2xl md:text-3xl font-founders-x-condensed font-medium">{selectedTrip.name}</h2>
               <Button
                 size="icon"
                 variant="ghost"
@@ -390,7 +390,6 @@ const Index = () => {
             <div className="overflow-y-auto p-4">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-medium font-founders-x-condensed">{selectedTrip.name}</h3>
                   <p className="text-gray-600 font-founders">{selectedTrip.description}</p>
 
                   <div className="grid gap-3">
