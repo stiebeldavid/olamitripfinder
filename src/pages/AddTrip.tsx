@@ -147,9 +147,9 @@ const AddTrip = () => {
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setGalleryFiles(files);
+      setGalleryFiles(prevFiles => [...prevFiles, ...files]);
       const previews = files.map(file => URL.createObjectURL(file));
-      setGalleryPreviews(previews);
+      setGalleryPreviews(prevPreviews => [...prevPreviews, ...previews]);
     }
   };
 
@@ -296,7 +296,10 @@ const AddTrip = () => {
                         alt="Brochure preview"
                         onDelete={() => {
                           setBrochureFile(null);
-                          setBrochurePreview(null);
+                          setBrochurePreview(prev => {
+                            if (prev) URL.revokeObjectURL(prev);
+                            return null;
+                          });
                           const input = document.getElementById('brochureImage') as HTMLInputElement;
                           if (input) input.value = '';
                         }}

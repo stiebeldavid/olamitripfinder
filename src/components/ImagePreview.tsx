@@ -20,7 +20,10 @@ const ImagePreview = ({ src, onDelete, alt = "Preview" }: ImagePreviewProps) => 
         variant="destructive"
         size="icon"
         className="absolute -top-2 -right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={onDelete}
+        onClick={(e) => {
+          e.preventDefault(); // Prevent form submission
+          onDelete();
+        }}
       >
         <Trash className="h-4 w-4" />
       </Button>
