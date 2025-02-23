@@ -49,6 +49,25 @@ const EditTrip = () => {
         .single();
 
       if (error) throw error;
+
+      // Get public URL for brochure image if it exists
+      if (data.brochure_image_path) {
+        const { data: publicUrl } = supabase.storage
+          .from('trip-photos')
+          .getPublicUrl(data.brochure_image_path);
+        data.brochureImage = publicUrl.publicUrl;
+      }
+
+      // Get public URLs for gallery images
+      if (data.gallery) {
+        data.gallery = await Promise.all(data.gallery.map(async (image: { image_path: string }) => {
+          const { data: publicUrl } = supabase.storage
+            .from('trip-photos')
+            .getPublicUrl(image.image_path);
+          return { ...image, publicUrl: publicUrl.publicUrl };
+        }));
+      }
+
       return data;
     },
   });
@@ -351,10 +370,10 @@ const EditTrip = () => {
                     accept="image/*"
                     onChange={handleBrochureChange}
                   />
-                  {(brochurePreview || trip.brochure_image_path) && (
+                  {(brochurePreview || trip.brochureImage) && (
                     <div className="mt-2">
                       <ImagePreview
-                        src={brochurePreview || `${trip.brochure_image_path}`}
+                        src={brochurePreview || trip.brochureImage}
                         alt="Brochure preview"
                         onDelete={async () => {
                           if (brochurePreview) {
@@ -399,10 +418,10 @@ const EditTrip = () => {
                     onChange={handleGalleryChange}
                   />
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {trip.gallery?.map((image: { image_path: string }) => (
+                    {trip.gallery?.map((image: { image_path: string; publicUrl: string }) => (
                       <ImagePreview
                         key={image.image_path}
-                        src={image.image_path}
+                        src={image.publicUrl}
                         alt="Gallery image"
                         onDelete={async () => {
                           try {
