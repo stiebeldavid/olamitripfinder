@@ -136,7 +136,6 @@ export type Database = {
           name: string
           organizer_contact: string
           organizer_name: string
-          show_trip: string
           spots: number | null
           start_date: string
           trip_id: number
@@ -154,7 +153,6 @@ export type Database = {
           name: string
           organizer_contact: string
           organizer_name: string
-          show_trip?: string
           spots?: number | null
           start_date: string
           trip_id?: number
@@ -172,7 +170,6 @@ export type Database = {
           name?: string
           organizer_contact?: string
           organizer_name?: string
-          show_trip?: string
           spots?: number | null
           start_date?: string
           trip_id?: number
