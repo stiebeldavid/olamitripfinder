@@ -442,6 +442,7 @@ const EditTrip = () => {
                             await handleDeleteBrochure();
                           }
                         }}
+                        showDelete={!brochurePreview}
                       />
                     </div>
                   )}
@@ -463,6 +464,7 @@ const EditTrip = () => {
                         src={image.publicUrl}
                         alt="Gallery image"
                         onDelete={() => handleDeleteGalleryImage(image.image_path)}
+                        showDelete={true}
                       />
                     ))}
                     {galleryPreviews.map((preview, index) => (
@@ -485,6 +487,7 @@ const EditTrip = () => {
                             if (input) input.value = '';
                           }
                         }}
+                        showDelete={false}
                       />
                     ))}
                   </div>
