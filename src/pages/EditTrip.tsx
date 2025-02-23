@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -18,7 +19,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImagePreview from "@/components/ImagePreview";
@@ -27,6 +28,7 @@ const EditTrip = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -377,12 +379,24 @@ const EditTrip = () => {
                             if (input) input.value = '';
                           } else {
                             try {
-                              const { error } = await supabase
+                              const { error: updateError } = await supabase
                                 .from('trips')
                                 .update({ brochure_image_path: null })
                                 .eq('trip_id', parseInt(tripId as string));
                               
-                              if (error) throw error;
+                              if (updateError) throw updateError;
+                              
+                              // Delete the file from storage
+                              if (trip.brochure_image_path) {
+                                const { error: deleteError } = await supabase.storage
+                                  .from('trip-photos')
+                                  .remove([trip.brochure_image_path]);
+                                
+                                if (deleteError) throw deleteError;
+                              }
+                              
+                              // Invalidate and refetch the query
+                              await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
                               
                               toast({
                                 title: "Success",
@@ -419,12 +433,23 @@ const EditTrip = () => {
                         alt="Gallery image"
                         onDelete={async () => {
                           try {
-                            const { error } = await supabase
+                            // Delete from the trip_gallery table
+                            const { error: deleteDbError } = await supabase
                               .from('trip_gallery')
                               .delete()
                               .eq('image_path', image.image_path);
                             
-                            if (error) throw error;
+                            if (deleteDbError) throw deleteDbError;
+                            
+                            // Delete the file from storage
+                            const { error: deleteStorageError } = await supabase.storage
+                              .from('trip-photos')
+                              .remove([image.image_path]);
+                            
+                            if (deleteStorageError) throw deleteStorageError;
+
+                            // Invalidate and refetch the query
+                            await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
                             
                             toast({
                               title: "Success",
