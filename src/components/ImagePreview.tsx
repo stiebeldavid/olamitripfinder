@@ -10,7 +10,7 @@ interface ImagePreviewProps {
 
 const ImagePreview = ({ src, onDelete, alt = "Preview" }: ImagePreviewProps) => {
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block group">
       <img
         src={src}
         alt={alt}
