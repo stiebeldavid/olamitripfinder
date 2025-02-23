@@ -24,7 +24,7 @@ import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const EditTrip = () => {
-  const { id } = useParams<{ id: string }>();
+  const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +34,7 @@ const EditTrip = () => {
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
 
   const { data: trip, isLoading, error } = useQuery({
-    queryKey: ['trip', id],
+    queryKey: ['trip', tripId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('trips')
@@ -43,7 +43,7 @@ const EditTrip = () => {
           gallery:trip_gallery(image_path),
           videos:trip_videos(video_url)
         `)
-        .eq('id', id)
+        .eq('trip_id', parseInt(tripId as string))
         .single();
 
       if (error) throw error;
@@ -100,7 +100,7 @@ const EditTrip = () => {
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
         })
-        .eq('id', id);
+        .eq('trip_id', parseInt(tripId as string));
 
       if (tripError) throw tripError;
 
@@ -116,7 +116,7 @@ const EditTrip = () => {
           const { error: galleryError } = await supabase
             .from('trip_gallery')
             .insert({
-              trip_id: id,
+              trip_id: trip.id,
               image_path: imageData.path,
             });
           
