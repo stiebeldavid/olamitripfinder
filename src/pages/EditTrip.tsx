@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -333,14 +332,13 @@ const EditTrip = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="spots">Available Spots</Label>
+                  <Label htmlFor="spots">Available Spots (optional)</Label>
                   <Input
                     id="spots"
                     name="spots"
                     type="number"
                     min="1"
                     defaultValue={trip.spots}
-                    required
                   />
                 </div>
 
