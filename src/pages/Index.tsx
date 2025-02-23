@@ -307,8 +307,7 @@ const Index = () => {
             className="flex items-center gap-1"
             onClick={() => setShowContactInfo(true)}
           >
-            <Phone className="w-4 h-4" />
-            <span>Contact</span>
+            Contact Us
           </Button>
         </div>
       </nav>
