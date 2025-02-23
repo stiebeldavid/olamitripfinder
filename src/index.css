@@ -1,3 +1,46 @@
+
+@font-face {
+  font-family: 'Founders Grotesk';
+  src: url('/FoundersGrotesk-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Founders Grotesk';
+  src: url('/FoundersGrotesk-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Founders Grotesk Condensed';
+  src: url('/FoundersGroteskCondensed-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Founders Grotesk X-Condensed';
+  src: url('/FoundersGroteskX-Condensed-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Founders Grotesk X-Condensed';
+  src: url('/FoundersGroteskX-Condensed-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Founders Grotesk X-Condensed';
+  src: url('/FoundersGroteskX-Condensed-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +139,6 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-founders;
   }
 }

@@ -301,7 +301,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 pb-14">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
-          <div className="font-['Playfair_Display'] text-xl text-primary">Olami Trip Finder</div>
+          <div className="font-founders-x-condensed text-xl text-primary">Olami Trip Finder</div>
           <Button 
             size="sm" 
             className="flex items-center gap-1"
@@ -323,18 +323,18 @@ const Index = () => {
         </div>
         <div className="relative pt-24 pb-16 px-4 md:pt-32 md:pb-24">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl md:text-5xl font-bold mb-6 font-['Playfair_Display'] text-white">
+            <h1 className="text-3xl md:text-5xl font-bold mb-6 font-founders-x-condensed text-white">
               Welcome to Olami Trip Finder
             </h1>
-            <p className="text-lg md:text-xl max-w-3xl leading-relaxed text-gray-100 mb-8">
+            <p className="text-lg md:text-xl max-w-3xl leading-relaxed text-gray-100 mb-8 font-founders">
               If you're an Olami educator in North America, you've come to the right place to find comprehensive information about upcoming trips to maximize your students' growth and to build your learning and growth community. Your exploration of all that's available begins here!
             </p>
             <Button 
               size="lg"
-              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
+              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white font-founders"
               onClick={() => {
                 const searchSection = document.getElementById('search-section');
-                const navHeight = 56; // height of the nav bar (14 * 4 = 56px)
+                const navHeight = 56;
                 if (searchSection) {
                   const elementPosition = searchSection.getBoundingClientRect().top + window.scrollY;
                   window.scrollTo({
@@ -357,7 +357,7 @@ const Index = () => {
             placeholder="Search trips..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-white rounded-full border-none shadow-sm text-sm"
+            className="w-full h-10 pl-10 pr-4 bg-white rounded-full border-none shadow-sm text-sm font-founders"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
@@ -378,7 +378,7 @@ const Index = () => {
         >
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
             <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
-              <h2 className="text-lg font-medium">Trip Details</h2>
+              <h2 className="text-lg font-medium font-founders">Trip Details</h2>
               <Button
                 size="icon"
                 variant="ghost"
@@ -390,8 +390,8 @@ const Index = () => {
             <div className="overflow-y-auto p-4">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-medium">{selectedTrip.name}</h3>
-                  <p className="text-gray-600">{selectedTrip.description}</p>
+                  <h3 className="text-xl font-medium font-founders-x-condensed">{selectedTrip.name}</h3>
+                  <p className="text-gray-600 font-founders">{selectedTrip.description}</p>
 
                   <div className="grid gap-3">
                     <div className="flex items-center gap-2">

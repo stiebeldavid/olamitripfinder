@@ -92,8 +92,9 @@ export default {
         "slide-up": "slide-up 0.3s ease-out",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Playfair Display", "serif"],
+        founders: ['Founders Grotesk', 'sans-serif'],
+        'founders-condensed': ['Founders Grotesk Condensed', 'sans-serif'],
+        'founders-x-condensed': ['Founders Grotesk X-Condensed', 'sans-serif'],
       },
     },
   },
