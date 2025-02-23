@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -22,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
+import ImagePreview from "@/components/ImagePreview";
 
 const EditTrip = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -32,6 +32,8 @@ const EditTrip = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [brochureFile, setBrochureFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const { data: trip, isLoading, error } = useQuery({
     queryKey: ['trip', tripId],
@@ -57,6 +59,13 @@ const EditTrip = () => {
       setEndDate(new Date(trip.end_date));
     }
   }, [trip]);
+
+  useEffect(() => {
+    return () => {
+      if (brochurePreview) URL.revokeObjectURL(brochurePreview);
+      galleryPreviews.forEach(preview => URL.revokeObjectURL(preview));
+    };
+  }, [brochurePreview, galleryPreviews]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -141,6 +150,23 @@ const EditTrip = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      setBrochureFile(file);
+      setBrochurePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setGalleryFiles(files);
+      const previews = files.map(file => URL.createObjectURL(file));
+      setGalleryPreviews(previews);
     }
   };
 
@@ -315,7 +341,7 @@ const EditTrip = () => {
                   />
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="brochureImage">
                     Update Brochure Image (current: {trip.brochure_image_path || "none"})
                   </Label>
@@ -323,27 +349,107 @@ const EditTrip = () => {
                     id="brochureImage"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setBrochureFile(e.target.files[0]);
-                      }
-                    }}
+                    onChange={handleBrochureChange}
                   />
+                  {(brochurePreview || trip.brochure_image_path) && (
+                    <div className="mt-2">
+                      <ImagePreview
+                        src={brochurePreview || `${trip.brochure_image_path}`}
+                        alt="Brochure preview"
+                        onDelete={async () => {
+                          if (brochurePreview) {
+                            setBrochureFile(null);
+                            setBrochurePreview(null);
+                            const input = document.getElementById('brochureImage') as HTMLInputElement;
+                            if (input) input.value = '';
+                          } else {
+                            try {
+                              const { error } = await supabase
+                                .from('trips')
+                                .update({ brochure_image_path: null })
+                                .eq('trip_id', parseInt(tripId as string));
+                              
+                              if (error) throw error;
+                              
+                              toast({
+                                title: "Success",
+                                description: "Brochure image removed successfully",
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to remove brochure image",
+                                variant: "destructive",
+                              });
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="gallery">Add More Gallery Images</Label>
                   <Input
                     id="gallery"
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        setGalleryFiles(Array.from(e.target.files));
-                      }
-                    }}
+                    onChange={handleGalleryChange}
                   />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {trip.gallery?.map((image: { image_path: string }) => (
+                      <ImagePreview
+                        key={image.image_path}
+                        src={image.image_path}
+                        alt="Gallery image"
+                        onDelete={async () => {
+                          try {
+                            const { error } = await supabase
+                              .from('trip_gallery')
+                              .delete()
+                              .eq('image_path', image.image_path);
+                            
+                            if (error) throw error;
+                            
+                            toast({
+                              title: "Success",
+                              description: "Gallery image removed successfully",
+                            });
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to remove gallery image",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      />
+                    ))}
+                    {galleryPreviews.map((preview, index) => (
+                      <ImagePreview
+                        key={preview}
+                        src={preview}
+                        alt={`New gallery image ${index + 1}`}
+                        onDelete={() => {
+                          const newFiles = [...galleryFiles];
+                          newFiles.splice(index, 1);
+                          setGalleryFiles(newFiles);
+                          
+                          const newPreviews = [...galleryPreviews];
+                          URL.revokeObjectURL(preview);
+                          newPreviews.splice(index, 1);
+                          setGalleryPreviews(newPreviews);
+                          
+                          if (newFiles.length === 0) {
+                            const input = document.getElementById('gallery') as HTMLInputElement;
+                            if (input) input.value = '';
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <div>

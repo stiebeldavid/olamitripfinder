@@ -19,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
+import ImagePreview from "@/components/ImagePreview";
 
 const AddTrip = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ const AddTrip = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [brochureFile, setBrochureFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -132,6 +135,30 @@ const AddTrip = () => {
       setIsSubmitting(false);
     }
   };
+
+  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      setBrochureFile(file);
+      setBrochurePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setGalleryFiles(files);
+      const previews = files.map(file => URL.createObjectURL(file));
+      setGalleryPreviews(previews);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (brochurePreview) URL.revokeObjectURL(brochurePreview);
+      galleryPreviews.forEach(preview => URL.revokeObjectURL(preview));
+    };
+  }, [brochurePreview, galleryPreviews]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -254,33 +281,65 @@ const AddTrip = () => {
                   <Input id="websiteUrl" name="websiteUrl" type="url" />
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="brochureImage">Brochure Image (optional)</Label>
                   <Input
                     id="brochureImage"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setBrochureFile(e.target.files[0]);
-                      }
-                    }}
+                    onChange={handleBrochureChange}
                   />
+                  {brochurePreview && (
+                    <div className="mt-2">
+                      <ImagePreview
+                        src={brochurePreview}
+                        alt="Brochure preview"
+                        onDelete={() => {
+                          setBrochureFile(null);
+                          setBrochurePreview(null);
+                          const input = document.getElementById('brochureImage') as HTMLInputElement;
+                          if (input) input.value = '';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="gallery">Gallery Images (optional)</Label>
                   <Input
                     id="gallery"
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        setGalleryFiles(Array.from(e.target.files));
-                      }
-                    }}
+                    onChange={handleGalleryChange}
                   />
+                  {galleryPreviews.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {galleryPreviews.map((preview, index) => (
+                        <ImagePreview
+                          key={preview}
+                          src={preview}
+                          alt={`Gallery image ${index + 1}`}
+                          onDelete={() => {
+                            const newFiles = [...galleryFiles];
+                            newFiles.splice(index, 1);
+                            setGalleryFiles(newFiles);
+                            
+                            const newPreviews = [...galleryPreviews];
+                            URL.revokeObjectURL(preview);
+                            newPreviews.splice(index, 1);
+                            setGalleryPreviews(newPreviews);
+                            
+                            if (newFiles.length === 0) {
+                              const input = document.getElementById('gallery') as HTMLInputElement;
+                              if (input) input.value = '';
+                            }
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
