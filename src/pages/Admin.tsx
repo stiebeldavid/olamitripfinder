@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +9,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { Trip } from "@/types/trip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const { toast } = useToast();
 
-  const { data: trips } = useQuery({
+  const { data: trips, refetch } = useQuery({
     queryKey: ['admin-trips'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,7 +47,8 @@ export default function Admin() {
         gender: trip.gender,
         location: trip.location,
         spots: trip.spots,
-        brochureImage: trip.brochure_image_path
+        brochureImage: trip.brochure_image_path,
+        show_trip: trip.show_trip
       })) as Trip[];
     },
     enabled: isAuthenticated // Only fetch when authenticated
@@ -60,6 +68,27 @@ export default function Admin() {
         description: "Invalid password",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleStatusChange = async (tripId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from('trips')
+      .update({ show_trip: newStatus })
+      .eq('id', tripId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update trip status",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Trip status updated successfully",
+      });
+      refetch(); // Refresh the data
     }
   };
 
@@ -142,13 +171,19 @@ export default function Admin() {
                   <div className="text-sm text-gray-500">{trip.location}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    trip.show_trip === 'Show' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {trip.show_trip}
-                  </span>
+                  <Select
+                    defaultValue={trip.show_trip}
+                    onValueChange={(value) => handleStatusChange(trip.id, value)}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Show">Show</SelectItem>
+                      <SelectItem value="Hidden">Hidden</SelectItem>
+                      <SelectItem value="Deleted">Deleted</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <Link to={`/edit-trip/${trip.trip_id}`}>
