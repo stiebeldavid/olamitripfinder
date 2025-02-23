@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, Link } from "react-router-dom";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 
@@ -122,9 +122,18 @@ const Index = () => {
     <div
       key={trip.id}
       className="relative group overflow-hidden"
-      onClick={() => setSelectedTrip(trip)}
     >
-      <div className="relative h-[140px] md:h-[280px]">
+      <Link 
+        to={`/edit-trip/${trip.trip_id}`} 
+        className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 p-2 rounded-full transition-colors"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Pencil className="w-4 h-4 text-white" />
+      </Link>
+      <div 
+        className="relative h-[140px] md:h-[280px]"
+        onClick={() => setSelectedTrip(trip)}
+      >
         <img
           src={trip.brochureImage || DEFAULT_IMAGE}
           alt={trip.name}

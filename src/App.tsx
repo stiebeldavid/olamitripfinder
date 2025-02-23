@@ -21,7 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/trip/:tripId" element={<Index />} />
           <Route path="/add-trip" element={<AddTrip />} />
-          <Route path="/edit-trip" element={<EditTrip />} />
+          <Route path="/edit-trip/:tripId" element={<EditTrip />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
