@@ -4,7 +4,7 @@ export type TripLocation = "united_states" | "international";
 
 export interface Trip {
   id: string;
-  trip_id: number;  // Adding this field to match the database structure
+  trip_id: number;
   name: string;
   description: string;
   startDate: string;
@@ -20,4 +20,5 @@ export interface Trip {
   brochureImage?: string;
   gallery?: string[];
   videoLinks?: string[];
+  show_trip?: string;  // Added this field to fix the TypeScript error
 }

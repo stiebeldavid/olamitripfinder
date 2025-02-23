@@ -123,13 +123,6 @@ const Index = () => {
       key={trip.id}
       className="relative group overflow-hidden"
     >
-      <Link 
-        to={`/edit-trip/${trip.trip_id}`} 
-        className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 p-2 rounded-full transition-colors"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Pencil className="w-4 h-4 text-white" />
-      </Link>
       <div 
         className="relative h-[140px] md:h-[280px]"
         onClick={() => setSelectedTrip(trip)}
