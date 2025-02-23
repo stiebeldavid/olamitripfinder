@@ -50,14 +50,6 @@ const EditTrip = () => {
 
       if (error) throw error;
 
-      // Get public URL for brochure image if it exists
-      if (data.brochure_image_path) {
-        const { data: publicUrl } = supabase.storage
-          .from('trip-photos')
-          .getPublicUrl(data.brochure_image_path);
-        data.brochureImage = publicUrl.publicUrl;
-      }
-
       // Get public URLs for gallery images
       if (data.gallery) {
         data.gallery = await Promise.all(data.gallery.map(async (image: { image_path: string }) => {
@@ -370,10 +362,12 @@ const EditTrip = () => {
                     accept="image/*"
                     onChange={handleBrochureChange}
                   />
-                  {(brochurePreview || trip.brochureImage) && (
+                  {(brochurePreview || trip.brochure_image_path) && (
                     <div className="mt-2">
                       <ImagePreview
-                        src={brochurePreview || trip.brochureImage}
+                        src={brochurePreview || supabase.storage
+                          .from('trip-photos')
+                          .getPublicUrl(trip.brochure_image_path || '').data.publicUrl}
                         alt="Brochure preview"
                         onDelete={async () => {
                           if (brochurePreview) {
