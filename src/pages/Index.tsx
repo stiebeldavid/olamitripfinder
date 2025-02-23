@@ -30,13 +30,14 @@ const fetchTrips = async (): Promise<Trip[]> => {
       gallery:trip_gallery(image_path),
       videos:trip_videos(video_url)
     `)
+    .eq('show_trip', 'Show')  // Only fetch trips with show_trip = 'Show'
     .order('start_date', { ascending: true });
   
   if (error) throw error;
   
   return data.map(trip => ({
     id: trip.id,
-    trip_id: trip.trip_id,  // Add this line to include trip_id in the mapping
+    trip_id: trip.trip_id,
     name: trip.name,
     description: trip.description || "",
     startDate: trip.start_date,
@@ -51,7 +52,8 @@ const fetchTrips = async (): Promise<Trip[]> => {
     spots: trip.spots,
     brochureImage: getPublicUrl(trip.brochure_image_path),
     gallery: trip.gallery?.map(g => getPublicUrl(g.image_path)) || [],
-    videoLinks: trip.videos?.map(v => v.video_url) || []
+    videoLinks: trip.videos?.map(v => v.video_url) || [],
+    show_trip: trip.show_trip
   }));
 };
 
