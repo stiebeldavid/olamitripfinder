@@ -10,7 +10,7 @@ interface ImagePreviewProps {
 
 const ImagePreview = ({ src, onDelete, alt = "Preview" }: ImagePreviewProps) => {
   return (
-    <div className="relative group">
+    <div className="relative inline-block">
       <img
         src={src}
         alt={alt}
@@ -19,7 +19,7 @@ const ImagePreview = ({ src, onDelete, alt = "Preview" }: ImagePreviewProps) => 
       <Button
         variant="destructive"
         size="icon"
-        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute -top-2 -right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={onDelete}
       >
         <Trash className="h-4 w-4" />
