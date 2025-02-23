@@ -178,6 +178,70 @@ const EditTrip = () => {
     }
   };
 
+  const handleDeleteGalleryImage = async (imagePath: string) => {
+    try {
+      const { error: deleteDbError } = await supabase
+        .from('trip_gallery')
+        .delete()
+        .eq('image_path', imagePath);
+      
+      if (deleteDbError) throw deleteDbError;
+      
+      const { error: deleteStorageError } = await supabase.storage
+        .from('trip-photos')
+        .remove([imagePath]);
+      
+      if (deleteStorageError) throw deleteStorageError;
+
+      await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
+      
+      toast({
+        title: "Success",
+        description: "Gallery image removed successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting gallery image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove gallery image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteBrochure = async () => {
+    if (!trip.brochure_image_path) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from('trips')
+        .update({ brochure_image_path: null })
+        .eq('trip_id', parseInt(tripId as string));
+      
+      if (updateError) throw updateError;
+      
+      const { error: deleteError } = await supabase.storage
+        .from('trip-photos')
+        .remove([trip.brochure_image_path]);
+      
+      if (deleteError) throw deleteError;
+      
+      await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
+      
+      toast({
+        title: "Success",
+        description: "Brochure image removed successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting brochure:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove brochure image",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -366,43 +430,16 @@ const EditTrip = () => {
                           .getPublicUrl(trip.brochure_image_path || '').data.publicUrl}
                         alt="Brochure preview"
                         onDelete={async () => {
-                          try {
-                            if (brochurePreview) {
-                              setBrochureFile(null);
-                              setBrochurePreview(prev => {
-                                if (prev) URL.revokeObjectURL(prev);
-                                return null;
-                              });
-                              const input = document.getElementById('brochureImage') as HTMLInputElement;
-                              if (input) input.value = '';
-                            } else if (trip.brochure_image_path) {
-                              const { error: updateError } = await supabase
-                                .from('trips')
-                                .update({ brochure_image_path: null })
-                                .eq('trip_id', parseInt(tripId as string));
-                              
-                              if (updateError) throw updateError;
-                              
-                              const { error: deleteError } = await supabase.storage
-                                .from('trip-photos')
-                                .remove([trip.brochure_image_path]);
-                              
-                              if (deleteError) throw deleteError;
-                              
-                              await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
-                              
-                              toast({
-                                title: "Success",
-                                description: "Brochure image removed successfully",
-                              });
-                            }
-                          } catch (error) {
-                            console.error('Error deleting brochure:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to remove brochure image",
-                              variant: "destructive",
+                          if (brochurePreview) {
+                            setBrochureFile(null);
+                            setBrochurePreview(prev => {
+                              if (prev) URL.revokeObjectURL(prev);
+                              return null;
                             });
+                            const input = document.getElementById('brochureImage') as HTMLInputElement;
+                            if (input) input.value = '';
+                          } else {
+                            await handleDeleteBrochure();
                           }
                         }}
                       />
@@ -425,36 +462,7 @@ const EditTrip = () => {
                         key={image.image_path}
                         src={image.publicUrl}
                         alt="Gallery image"
-                        onDelete={async () => {
-                          try {
-                            const { error: deleteDbError } = await supabase
-                              .from('trip_gallery')
-                              .delete()
-                              .eq('image_path', image.image_path);
-                            
-                            if (deleteDbError) throw deleteDbError;
-                            
-                            const { error: deleteStorageError } = await supabase.storage
-                              .from('trip-photos')
-                              .remove([image.image_path]);
-                            
-                            if (deleteStorageError) throw deleteStorageError;
-
-                            await queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
-                            
-                            toast({
-                              title: "Success",
-                              description: "Gallery image removed successfully",
-                            });
-                          } catch (error) {
-                            console.error('Error deleting gallery image:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to remove gallery image",
-                              variant: "destructive",
-                            });
-                          }
-                        }}
+                        onDelete={() => handleDeleteGalleryImage(image.image_path)}
                       />
                     ))}
                     {galleryPreviews.map((preview, index) => (
