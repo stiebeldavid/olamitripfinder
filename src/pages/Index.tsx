@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil, UserCircle2, UserRound, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -140,6 +140,18 @@ const Index = () => {
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
   };
 
+  const getGenderIcon = (gender: string) => {
+    switch(gender) {
+      case 'female':
+        return <UserCircle2 className="w-4 h-4" />;
+      case 'male':
+        return <UserRound className="w-4 h-4" />;
+      case 'mixed':
+      default:
+        return <Users className="w-4 h-4" />;
+    }
+  };
+
   const TripCard = ({ trip }: { trip: Trip }) => (
     <div
       key={trip.id}
@@ -164,7 +176,7 @@ const Index = () => {
               <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
             </div>
             <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
-              <User className="w-4 h-4" />
+              {getGenderIcon(trip.gender)}
               <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
             </div>
           </div>
