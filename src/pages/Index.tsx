@@ -120,6 +120,26 @@ const Index = () => {
     }, {} as Record<string, Trip[]>);
   };
 
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const currentYear = new Date().getFullYear();
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
+    
+    let startFormatString = 'MMM d';
+    if (startYear !== currentYear) {
+      startFormatString += ", yyyy";
+    }
+    
+    let endFormatString = 'MMM d';
+    if (endYear !== currentYear || endYear !== startYear) {
+      endFormatString += ", yyyy";
+    }
+    
+    return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
+  };
+
   const TripCard = ({ trip }: { trip: Trip }) => (
     <div
       key={trip.id}
@@ -135,6 +155,9 @@ const Index = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
+        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
+          {formatDateRange(trip.startDate, trip.endDate)}
+        </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
           <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
@@ -402,8 +425,7 @@ const Index = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-primary" />
                       <span className="text-gray-600">
-                        {format(new Date(selectedTrip.startDate), "MMM d")} -{" "}
-                        {format(new Date(selectedTrip.endDate), "MMM d, yyyy")}
+                        {formatDateRange(selectedTrip.startDate, selectedTrip.endDate)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
