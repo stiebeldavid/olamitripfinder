@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation, useParams, Link } from "react-router-dom";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+const FEMALE_ICON = "/lovable-uploads/08365c95-5d86-483d-ab74-eede50da2036.png";
 
 const getPublicUrl = (path: string | null | undefined): string => {
   if (!path) return DEFAULT_IMAGE;
@@ -143,7 +144,7 @@ const Index = () => {
   const getGenderIcon = (gender: string) => {
     switch(gender) {
       case 'female':
-        return <User className="w-4 h-4" />;
+        return <img src={FEMALE_ICON} alt="Female" className="w-4 h-4" />;
       case 'male':
         return <UserRound className="w-4 h-4" />;
       case 'mixed':
