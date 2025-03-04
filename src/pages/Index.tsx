@@ -11,6 +11,7 @@ import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, useParams, Link } from "react-router-dom";
+import "../styles/imageEffects.css";
 
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 const FEMALE_ICON = "/lovable-uploads/08365c95-5d86-483d-ab74-eede50da2036.png";
@@ -56,6 +57,18 @@ const fetchTrips = async (): Promise<Trip[]> => {
     videoLinks: trip.videos?.map(v => v.video_url) || [],
     show_trip: trip.show_trip
   }));
+};
+
+const getGenderIcon = (gender: string) => {
+  switch(gender) {
+    case 'female':
+      return <img src={FEMALE_ICON} alt="Female" className="w-4 h-4 invert-colors" />;
+    case 'male':
+      return <UserRound className="w-4 h-4" />;
+    case 'mixed':
+    default:
+      return <Users className="w-4 h-4" />;
+  }
 };
 
 const Index = () => {
@@ -139,18 +152,6 @@ const Index = () => {
     }
     
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
-  };
-
-  const getGenderIcon = (gender: string) => {
-    switch(gender) {
-      case 'female':
-        return <img src={FEMALE_ICON} alt="Female" className="w-4 h-4" />;
-      case 'male':
-        return <UserRound className="w-4 h-4" />;
-      case 'mixed':
-      default:
-        return <Users className="w-4 h-4" />;
-    }
   };
 
   const TripCard = ({ trip }: { trip: Trip }) => (
