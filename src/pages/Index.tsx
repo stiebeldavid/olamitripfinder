@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil, Users, UserCircle2, UserRound } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
@@ -140,67 +140,52 @@ const Index = () => {
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
   };
 
-  const TripCard = ({ trip }: { trip: Trip }) => {
-    const getGenderIcon = (gender: TripGender) => {
-      switch (gender) {
-        case "female":
-          return <UserCircle2 className="w-4 h-4" />;
-        case "male":
-          return <UserRound className="w-4 h-4" />;
-        case "mixed":
-          return <Users className="w-4 h-4" />;
-        default:
-          return <User className="w-4 h-4" />;
-      }
-    };
-
-    return (
-      <div
-        key={trip.id}
-        className="relative group overflow-hidden cursor-pointer"
-        onClick={() => setSelectedTrip(trip)}
-      >
-        <div className="relative h-[140px] md:h-[280px]">
-          <img
-            src={trip.brochureImage || DEFAULT_IMAGE}
-            alt={trip.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
-          <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
-            {formatDateRange(trip.startDate, trip.endDate)}
+  const TripCard = ({ trip }: { trip: Trip }) => (
+    <div
+      key={trip.id}
+      className="relative group overflow-hidden cursor-pointer"
+      onClick={() => setSelectedTrip(trip)}
+    >
+      <div className="relative h-[140px] md:h-[280px]">
+        <img
+          src={trip.brochureImage || DEFAULT_IMAGE}
+          alt={trip.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
+        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
+          {formatDateRange(trip.startDate, trip.endDate)}
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
+          <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
+            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+              <MapPin className="w-4 h-4" />
+              <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+              <User className="w-4 h-4" />
+              <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
+            </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
-            <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
-              <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
-                {getGenderIcon(trip.gender)}
-                <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
-              </div>
+          <div className="flex gap-2">
+            <div 
+              className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none px-4 py-2 rounded text-center"
+            >
+              Learn More
             </div>
-            <div className="flex gap-2">
+            {trip.spots != null && (
               <div 
-                className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none px-4 py-2 rounded text-center"
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center"
               >
-                Learn More
+                {trip.spots} spots left
               </div>
-              {trip.spots != null && (
-                <div 
-                  className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center"
-                >
-                  {trip.spots} spots left
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
   const FilterSection = () => (
     <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
