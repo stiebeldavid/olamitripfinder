@@ -143,7 +143,7 @@ const Index = () => {
   const getGenderIcon = (gender: string) => {
     switch(gender) {
       case 'female':
-        return <UserCircle2 className="w-4 h-4" />;
+        return <User className="w-4 h-4" />;
       case 'male':
         return <UserRound className="w-4 h-4" />;
       case 'mixed':
