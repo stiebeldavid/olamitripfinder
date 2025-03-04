@@ -155,7 +155,7 @@ const Index = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
-        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
+        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
           {formatDateRange(trip.startDate, trip.endDate)}
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
