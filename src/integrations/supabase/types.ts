@@ -139,6 +139,7 @@ export type Database = {
           show_trip: string
           spots: number | null
           start_date: string
+          thumbnail_image: string | null
           trip_id: number
           updated_at: string
           website_url: string | null
@@ -157,6 +158,7 @@ export type Database = {
           show_trip?: string
           spots?: number | null
           start_date: string
+          thumbnail_image?: string | null
           trip_id?: number
           updated_at?: string
           website_url?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           show_trip?: string
           spots?: number | null
           start_date?: string
+          thumbnail_image?: string | null
           trip_id?: number
           updated_at?: string
           website_url?: string | null

@@ -60,7 +60,7 @@ const EditTrip = () => {
           gallery:trip_gallery(id, image_path),
           videos:trip_videos(id, video_url)
         `)
-        .eq('trip_id', tripId)
+        .eq('trip_id', parseInt(tripId as string))
         .single();
 
       if (error) throw error;
