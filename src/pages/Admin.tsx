@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -71,6 +79,13 @@ export default function Admin() {
     },
     enabled: isAuthenticated
   });
+
+  // Format date correctly without timezone offset
+  const formatDate = (dateString: string) => {
+    // Create a date with correct timezone handling
+    const date = new Date(dateString);
+    return format(date, 'MMM d, yyyy');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,41 +305,31 @@ export default function Admin() {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dates
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Location
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Dates</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {trips?.map((trip) => (
-              <tr key={trip.id} className={trip.show_trip === "Deleted" ? "bg-gray-100" : ""}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{trip.name}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <TableRow key={trip.id} className={trip.show_trip === "Deleted" ? "bg-gray-100" : ""}>
+                <TableCell>
+                  <div className="font-medium">{trip.name}</div>
+                </TableCell>
+                <TableCell>
                   <div className="text-sm text-gray-500">
-                    {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
+                    {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </TableCell>
+                <TableCell>
                   <div className="text-sm text-gray-500">{trip.location}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </TableCell>
+                <TableCell>
                   <Select
                     defaultValue={trip.show_trip}
                     onValueChange={(value) => handleStatusChange(trip.id, value)}
@@ -338,8 +343,8 @@ export default function Admin() {
                       <SelectItem value="Deleted">Deleted</SelectItem>
                     </SelectContent>
                   </Select>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center space-x-2">
                     <Link to={`/edit-trip/${trip.trip_id}`}>
                       <Button variant="ghost" size="sm">
@@ -359,11 +364,11 @@ export default function Admin() {
                       )}
                     </Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
