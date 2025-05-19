@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,7 +21,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import ImagePreview from "@/components/ImagePreview";
 import ThumbnailSelector from "@/components/ThumbnailSelector";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const AddTrip = () => {
   const navigate = useNavigate();
@@ -87,8 +85,6 @@ const AddTrip = () => {
         thumbnailImagePath = `gallery/${filename}`;
       }
 
-      const isInternship = formData.get('isInternship') === 'on';
-
       const { data: trip, error: tripError } = await supabase
         .from('trips')
         .insert({
@@ -105,9 +101,7 @@ const AddTrip = () => {
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
           show_trip: 'Hidden',
-          trip_id: nextTripId,
-          price: formData.get('price') as string || null,
-          is_internship: isInternship
+          trip_id: nextTripId
         })
         .select()
         .single();
@@ -284,30 +278,14 @@ const AddTrip = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="spots">Available Spots (optional)</Label>
-                    <Input
-                      id="spots"
-                      name="spots"
-                      type="number"
-                      min="1"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="price">Price (optional)</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      placeholder="e.g., $1,500 USD"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="isInternship" name="isInternship" />
-                  <Label htmlFor="isInternship">This is an internship program</Label>
+                <div>
+                  <Label htmlFor="spots">Available Spots (optional)</Label>
+                  <Input
+                    id="spots"
+                    name="spots"
+                    type="number"
+                    min="1"
+                  />
                 </div>
 
                 <div>

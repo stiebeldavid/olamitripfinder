@@ -132,12 +132,10 @@ export type Database = {
           end_date: string
           gender: Database["public"]["Enums"]["trip_gender"]
           id: string
-          is_internship: boolean | null
           location: Database["public"]["Enums"]["trip_location"]
           name: string
           organizer_contact: string
           organizer_name: string
-          price: string | null
           show_trip: string
           spots: number | null
           start_date: string
@@ -153,12 +151,10 @@ export type Database = {
           end_date: string
           gender?: Database["public"]["Enums"]["trip_gender"]
           id?: string
-          is_internship?: boolean | null
           location: Database["public"]["Enums"]["trip_location"]
           name: string
           organizer_contact: string
           organizer_name: string
-          price?: string | null
           show_trip?: string
           spots?: number | null
           start_date: string
@@ -174,12 +170,10 @@ export type Database = {
           end_date?: string
           gender?: Database["public"]["Enums"]["trip_gender"]
           id?: string
-          is_internship?: boolean | null
           location?: Database["public"]["Enums"]["trip_location"]
           name?: string
           organizer_contact?: string
           organizer_name?: string
-          price?: string | null
           show_trip?: string
           spots?: number | null
           start_date?: string
