@@ -39,6 +39,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
   return data.map(trip => {
     // Determine which image to use as the card thumbnail
     let thumbnailImage = DEFAULT_IMAGE;
+    
     if (trip.thumbnail_image) {
       // If a thumbnail is specifically selected, use that
       thumbnailImage = getPublicUrl(trip.thumbnail_image);
@@ -46,6 +47,9 @@ const fetchTrips = async (): Promise<Trip[]> => {
       // Otherwise use the brochure image
       thumbnailImage = getPublicUrl(trip.brochure_image_path);
     }
+    
+    // Log for debugging
+    console.log(`Trip ${trip.name} - Thumbnail: ${trip.thumbnail_image}, Using: ${thumbnailImage}`);
     
     return {
       id: trip.id,
@@ -164,6 +168,11 @@ const Index = () => {
           src={trip.thumbnailImage} 
           alt={trip.name} 
           className="w-full h-full object-cover" 
+          onError={(e) => {
+            // If image fails to load, fallback to default
+            console.log(`Image failed to load: ${(e.target as HTMLImageElement).src}`);
+            (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
         <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
