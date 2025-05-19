@@ -14,7 +14,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   src,
   alt,
   onDelete,
-  showDelete = false
+  showDelete = true // Change default to true so delete button is visible by default
 }) => {
   return (
     <div className="relative rounded-md overflow-hidden h-20 w-20">

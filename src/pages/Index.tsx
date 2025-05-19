@@ -36,26 +36,39 @@ const fetchTrips = async (): Promise<Trip[]> => {
     
   if (error) throw error;
   
-  return data.map(trip => ({
-    id: trip.id,
-    trip_id: trip.trip_id,
-    name: trip.name,
-    description: trip.description || "",
-    startDate: trip.start_date,
-    endDate: trip.end_date,
-    websiteUrl: trip.website_url,
-    organizer: {
-      name: trip.organizer_name,
-      contact: trip.organizer_contact
-    },
-    gender: trip.gender,
-    location: trip.location,
-    spots: trip.spots,
-    brochureImage: getPublicUrl(trip.brochure_image_path),
-    gallery: trip.gallery?.map(g => getPublicUrl(g.image_path)) || [],
-    videoLinks: trip.videos?.map(v => v.video_url) || [],
-    show_trip: trip.show_trip
-  }));
+  return data.map(trip => {
+    // Determine which image to use as the card thumbnail
+    let thumbnailImage = DEFAULT_IMAGE;
+    if (trip.thumbnail_image) {
+      // If a thumbnail is specifically selected, use that
+      thumbnailImage = getPublicUrl(trip.thumbnail_image);
+    } else if (trip.brochure_image_path) {
+      // Otherwise use the brochure image
+      thumbnailImage = getPublicUrl(trip.brochure_image_path);
+    }
+    
+    return {
+      id: trip.id,
+      trip_id: trip.trip_id,
+      name: trip.name,
+      description: trip.description || "",
+      startDate: trip.start_date,
+      endDate: trip.end_date,
+      websiteUrl: trip.website_url,
+      organizer: {
+        name: trip.organizer_name,
+        contact: trip.organizer_contact
+      },
+      gender: trip.gender,
+      location: trip.location,
+      spots: trip.spots,
+      brochureImage: getPublicUrl(trip.brochure_image_path), // Always keep brochure image for the popup
+      thumbnailImage: thumbnailImage, // New field for card display
+      gallery: trip.gallery?.map(g => getPublicUrl(g.image_path)) || [],
+      videoLinks: trip.videos?.map(v => v.video_url) || [],
+      show_trip: trip.show_trip
+    };
+  });
 };
 const getGenderIcon = (gender: string) => {
   switch (gender) {
@@ -144,13 +157,14 @@ const Index = () => {
     
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
   };
-  const TripCard = ({
-    trip
-  }: {
-    trip: Trip;
-  }) => <div key={trip.id} className="relative group overflow-hidden cursor-pointer" onClick={() => setSelectedTrip(trip)}>
+  const TripCard = ({ trip }: { trip: Trip; }) => (
+    <div key={trip.id} className="relative group overflow-hidden cursor-pointer" onClick={() => setSelectedTrip(trip)}>
       <div className="relative h-[140px] md:h-[280px]">
-        <img src={trip.brochureImage || DEFAULT_IMAGE} alt={trip.name} className="w-full h-full object-cover" />
+        <img 
+          src={trip.thumbnailImage} 
+          alt={trip.name} 
+          className="w-full h-full object-cover" 
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
         <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
           {formatDateRange(trip.startDate, trip.endDate)}
@@ -171,13 +185,16 @@ const Index = () => {
             <div className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none px-4 py-2 rounded text-center">
               Learn More
             </div>
-            {trip.spots != null && <div className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center">
+            {trip.spots != null && (
+              <div className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center">
                 {trip.spots} spots left
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
   const FilterSection = () => <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
       <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 md:sticky md:top-20 md:self-start">
         <div>
@@ -328,11 +345,12 @@ const Index = () => {
         </div>
       </div>
 
-      {selectedTrip && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={e => {
-      if (e.target === e.currentTarget) {
-        setSelectedTrip(null);
-      }
-    }}>
+      {selectedTrip && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelectedTrip(null);
+          }
+        }}>
           <div className="bg-white rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-hidden">
             <div className="sticky top-0 bg-white border-b flex items-center justify-between p-4 z-10">
               <h2 className="text-3xl md:text-5xl font-founders-x-condensed font-medium">{selectedTrip.name}</h2>
@@ -404,7 +422,12 @@ const Index = () => {
                 </div>
 
                 <div>
-                  <img src={selectedTrip.brochureImage || DEFAULT_IMAGE} alt={selectedTrip.name} className="w-full rounded-lg cursor-pointer mb-6" onClick={() => setSelectedImage(selectedTrip.brochureImage || DEFAULT_IMAGE)} />
+                  <img 
+                    src={selectedTrip.brochureImage || DEFAULT_IMAGE} 
+                    alt={selectedTrip.name} 
+                    className="w-full rounded-lg cursor-pointer mb-6" 
+                    onClick={() => setSelectedImage(selectedTrip.brochureImage || DEFAULT_IMAGE)} 
+                  />
                 </div>
               </div>
 
@@ -446,7 +469,8 @@ const Index = () => {
                 </div>}
             </div>
           </div>
-        </div>}
+        </div>
+      )}
 
       {selectedImage && <ImageViewer src={selectedImage} alt="Trip image" onClose={() => setSelectedImage(null)} />}
 

@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import ImagePreview from "@/components/ImagePreview";
+import ThumbnailSelector from "@/components/ThumbnailSelector";
 
 const AddTrip = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const AddTrip = () => {
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [thumbnailImage, setThumbnailImage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,6 +76,15 @@ const AddTrip = () => {
       
       const nextTripId = tripsData && tripsData.length > 0 ? tripsData[0].trip_id + 1 : 1;
 
+      // Determine which gallery image to use as thumbnail, if any
+      let thumbnailImagePath = null;
+      if (thumbnailImage) {
+        // Extract the filename from the thumbnailImage URL
+        const parts = thumbnailImage.split('/');
+        const filename = parts[parts.length - 1];
+        thumbnailImagePath = `gallery/${filename}`;
+      }
+
       const { data: trip, error: tripError } = await supabase
         .from('trips')
         .insert({
@@ -86,6 +97,7 @@ const AddTrip = () => {
           spots: parseInt(formData.get('spots') as string) || null,
           website_url: formData.get('websiteUrl') as string || null,
           brochure_image_path: brochureImagePath,
+          thumbnail_image: thumbnailImagePath,
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
           show_trip: 'Hidden',
@@ -325,6 +337,12 @@ const AddTrip = () => {
                           src={preview}
                           alt={`Gallery image ${index + 1}`}
                           onDelete={() => {
+                            // If this was selected as thumbnail, reset thumbnail
+                            if (thumbnailImage === preview) {
+                              setThumbnailImage(null);
+                            }
+                            
+                            // ... keep existing code (remove gallery image)
                             const newFiles = [...galleryFiles];
                             newFiles.splice(index, 1);
                             setGalleryFiles(newFiles);
@@ -339,6 +357,7 @@ const AddTrip = () => {
                               if (input) input.value = '';
                             }
                           }}
+                          showDelete={true}
                         />
                       ))}
                     </div>

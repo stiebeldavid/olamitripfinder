@@ -18,6 +18,7 @@ export interface Trip {
   location: TripLocation;
   spots: number;
   brochureImage?: string;
+  thumbnailImage?: string; // New field to store the selected thumbnail image
   gallery?: string[];
   videoLinks?: string[];
   show_trip?: string;
