@@ -197,13 +197,13 @@ const EditTrip = () => {
         await Promise.all(galleryPromises);
       }
 
-      console.log('EditTrip: Trip update successful, redirecting to homepage');
+      console.log('EditTrip: Trip update successful, redirecting to admin page');
       toast({
         title: "Success",
         description: "Trip updated successfully",
       });
 
-      navigate('/');
+      navigate('/admin');
     } catch (error) {
       console.error('EditTrip: Error updating trip:', error);
       toast({
@@ -347,7 +347,7 @@ const EditTrip = () => {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-display text-gray-900">Edit Trip</h1>
-            <Link to="/">
+            <Link to="/admin">
               <Button variant="outline">Back to Trips</Button>
             </Link>
           </div>

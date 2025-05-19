@@ -123,7 +123,7 @@ const AddTrip = () => {
         description: "Trip created successfully",
       });
 
-      navigate('/');
+      navigate('/admin');
     } catch (error) {
       console.error('Error creating trip:', error);
       toast({
@@ -166,7 +166,7 @@ const AddTrip = () => {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-display text-gray-900">Add New Trip</h1>
-            <Link to="/">
+            <Link to="/admin">
               <Button variant="outline">Back to Trips</Button>
             </Link>
           </div>
