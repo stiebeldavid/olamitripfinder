@@ -1,38 +1,36 @@
 
-import { Trash } from "lucide-react";
-import { Button } from "./ui/button";
+import React from 'react';
+import { X } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface ImagePreviewProps {
   src: string;
-  onDelete: () => void;
-  alt?: string;
+  alt: string;
+  onDelete?: () => void;
   showDelete?: boolean;
 }
 
-const ImagePreview = ({ 
-  src, 
-  onDelete, 
-  alt = "Preview",
-  showDelete = true 
-}: ImagePreviewProps) => {
+const ImagePreview: React.FC<ImagePreviewProps> = ({
+  src,
+  alt,
+  onDelete,
+  showDelete = false
+}) => {
   return (
-    <div className="relative inline-block">
+    <div className="relative rounded-md overflow-hidden h-20 w-20">
       <img
         src={src}
         alt={alt}
-        className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+        className="h-full w-full object-cover"
       />
-      {showDelete && (
+      {showDelete && onDelete && (
         <Button
           variant="destructive"
           size="icon"
-          className="absolute -top-2 -right-2 h-8 w-8"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            onDelete();
-          }}
+          className="absolute top-0 right-0 h-6 w-6 rounded-full opacity-100"
+          onClick={onDelete}
         >
-          <Trash className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </Button>
       )}
     </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -36,7 +37,6 @@ const EditTrip = () => {
   const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
-  // Add debugging logs for initial params
   console.log('EditTrip: Component mounted with tripId:', tripId);
 
   const { data: trip, isLoading, error } = useQuery({
@@ -102,8 +102,18 @@ const EditTrip = () => {
         start: trip.start_date,
         end: trip.end_date
       });
-      setStartDate(new Date(trip.start_date));
-      setEndDate(new Date(trip.end_date));
+      
+      // Create dates with timezone handling to ensure correct date is used
+      // Use date-only strings (YYYY-MM-DD) to avoid timezone adjustments
+      const startDateStr = trip.start_date;
+      const endDateStr = trip.end_date;
+      
+      // Parse date strings without timezone adjustment
+      const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+      const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+      
+      setStartDate(new Date(startYear, startMonth - 1, startDay));
+      setEndDate(new Date(endYear, endMonth - 1, endDay));
     }
   }, [trip]);
 
@@ -153,13 +163,19 @@ const EditTrip = () => {
 
       console.log('EditTrip: Updating trip in database with ID:', tripId);
       
+      // Format dates in YYYY-MM-DD format without timezone issues
+      const formattedStartDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+      const formattedEndDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      
+      console.log('EditTrip: Formatted dates for database:', formattedStartDate, formattedEndDate);
+      
       const { error: tripError } = await supabase
         .from('trips')
         .update({
           name: formData.get('name') as string,
           description: formData.get('description') as string,
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
+          start_date: formattedStartDate,
+          end_date: formattedEndDate,
           location: formData.get('location') as TripLocation,
           gender: formData.get('gender') as TripGender,
           spots: parseInt(formData.get('spots') as string) || null,
@@ -329,7 +345,7 @@ const EditTrip = () => {
             <h1 className="text-2xl font-medium text-gray-900 mb-4">Error Loading Trip</h1>
             <p className="text-gray-600 mb-4">Unable to load trip details. Please try again later.</p>
             <p className="text-gray-600 mb-4 text-sm">{error instanceof Error ? error.message : "Unknown error"}</p>
-            <Link to="/">
+            <Link to="/admin">
               <Button>Back to Trips</Button>
             </Link>
           </div>
@@ -390,6 +406,7 @@ const EditTrip = () => {
                           selected={startDate}
                           onSelect={setStartDate}
                           initialFocus
+                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>
@@ -416,6 +433,7 @@ const EditTrip = () => {
                           selected={endDate}
                           onSelect={setEndDate}
                           initialFocus
+                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>

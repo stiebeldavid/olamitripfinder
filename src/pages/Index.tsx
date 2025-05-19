@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil, UserCircle2, UserRound, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Trip } from "@/types/trip";
@@ -24,18 +24,18 @@ const getPublicUrl = (path: string | null | undefined): string => {
   return publicUrl || DEFAULT_IMAGE;
 };
 const fetchTrips = async (): Promise<Trip[]> => {
-  const {
-    data,
-    error
-  } = await supabase.from('trips').select(`
+  const { data, error } = await supabase
+    .from('trips')
+    .select(`
       *,
       gallery:trip_gallery(image_path),
       videos:trip_videos(video_url)
-    `).eq('show_trip', 'Show') // Only fetch trips with show_trip = 'Show'
-  .order('start_date', {
-    ascending: true
-  });
+    `)
+    .eq('show_trip', 'Show')
+    .order('start_date', { ascending: true });
+    
   if (error) throw error;
+  
   return data.map(trip => ({
     id: trip.id,
     trip_id: trip.trip_id,
@@ -125,19 +125,23 @@ const Index = () => {
     }, {} as Record<string, Trip[]>);
   };
   const formatDateRange = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    
     const currentYear = new Date().getFullYear();
     const startYear = start.getFullYear();
     const endYear = end.getFullYear();
+    
     let startFormatString = 'MMM d';
     if (startYear !== currentYear) {
       startFormatString += ", yyyy";
     }
+    
     let endFormatString = 'MMM d';
     if (endYear !== currentYear || endYear !== startYear) {
       endFormatString += ", yyyy";
     }
+    
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
   };
   const TripCard = ({
