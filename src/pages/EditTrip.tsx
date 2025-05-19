@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -39,6 +40,8 @@ const EditTrip = () => {
   const { data: trip, isLoading, error } = useQuery({
     queryKey: ['trip', tripId],
     queryFn: async () => {
+      if (!tripId) throw new Error("Trip ID is required");
+      
       const { data, error } = await supabase
         .from('trips')
         .select(`
@@ -46,11 +49,19 @@ const EditTrip = () => {
           gallery:trip_gallery(image_path),
           videos:trip_videos(video_url)
         `)
-        .eq('trip_id', parseInt(tripId as string))
+        .eq('trip_id', parseInt(tripId))
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching trip:", error);
+        throw error;
+      }
 
+      if (!data) {
+        throw new Error("Trip not found");
+      }
+
+      // Process gallery images to get public URLs
       if (data.gallery) {
         data.gallery = await Promise.all(data.gallery.map(async (image: { image_path: string }) => {
           const { data: publicUrl } = supabase.storage
@@ -93,7 +104,7 @@ const EditTrip = () => {
     const formData = new FormData(e.currentTarget);
 
     try {
-      let brochureImagePath = trip.brochure_image_path;
+      let brochureImagePath = trip?.brochure_image_path;
       if (brochureFile) {
         const { data: brochureData, error: brochureError } = await supabase.storage
           .from('trip-photos')
@@ -101,6 +112,10 @@ const EditTrip = () => {
         
         if (brochureError) throw brochureError;
         brochureImagePath = brochureData.path;
+      }
+
+      if (!tripId) {
+        throw new Error("Trip ID is required");
       }
 
       const { error: tripError } = await supabase
@@ -112,13 +127,13 @@ const EditTrip = () => {
           end_date: endDate.toISOString().split('T')[0],
           location: formData.get('location') as TripLocation,
           gender: formData.get('gender') as TripGender,
-          spots: parseInt(formData.get('spots') as string),
+          spots: parseInt(formData.get('spots') as string) || null,
           website_url: formData.get('websiteUrl') as string || null,
           brochure_image_path: brochureImagePath,
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
         })
-        .eq('trip_id', parseInt(tripId as string));
+        .eq('trip_id', parseInt(tripId));
 
       if (tripError) throw tripError;
 
@@ -210,7 +225,7 @@ const EditTrip = () => {
   };
 
   const handleDeleteBrochure = async () => {
-    if (!trip.brochure_image_path) return;
+    if (!trip?.brochure_image_path) return;
 
     try {
       const { error: updateError } = await supabase
@@ -271,6 +286,7 @@ const EditTrip = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-2xl font-medium text-gray-900 mb-4">Error Loading Trip</h1>
             <p className="text-gray-600 mb-4">Unable to load trip details. Please try again later.</p>
+            <p className="text-gray-600 mb-4 text-sm">{error instanceof Error ? error.message : "Unknown error"}</p>
             <Link to="/">
               <Button>Back to Trips</Button>
             </Link>
