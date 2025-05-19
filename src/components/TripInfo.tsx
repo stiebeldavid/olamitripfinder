@@ -1,11 +1,10 @@
 
-import { Fragment, useRef } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X } from 'lucide-react';
+import { X, Briefcase, CalendarDays, Users, ExternalLink } from 'lucide-react';
 import { Trip } from '@/types/trip';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, CalendarDays, MapPin, Users, External } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ImageViewer from './ImageViewer';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +26,7 @@ const getPublicUrl = (path: string | null | undefined): string => {
 
 const TripInfo = ({ trip, onClose }: TripInfoProps) => {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   // Function to determine location display text
   const getLocationText = (location: string) => {
@@ -122,7 +122,10 @@ const TripInfo = ({ trip, onClose }: TripInfoProps) => {
                           </div>
                         )}
                       
-                        <ImageViewer tripId={trip.id} />
+                        {/* Placeholder for gallery */}
+                        <div className="bg-gray-100 p-4 rounded-lg text-center">
+                          <p className="text-gray-500">Gallery coming soon...</p>
+                        </div>
                       </div>
 
                       <div className="space-y-6 bg-gray-50 p-4 rounded-lg">
@@ -163,7 +166,7 @@ const TripInfo = ({ trip, onClose }: TripInfoProps) => {
                           <div>
                             <Button className="w-full" asChild>
                               <a href={trip.websiteUrl} target="_blank" rel="noopener noreferrer">
-                                <External className="w-4 h-4 mr-2" />
+                                <ExternalLink className="w-4 h-4 mr-2" />
                                 Visit Website
                               </a>
                             </Button>
