@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,14 @@ export default function Admin() {
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [showDeletedTrips, setShowDeletedTrips] = useState(false);
   const { toast } = useToast();
+
+  // Check if user is already authenticated from session storage
+  useEffect(() => {
+    const sessionAuth = sessionStorage.getItem("adminAuthenticated");
+    if (sessionAuth === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const { data: trips, refetch } = useQuery({
     queryKey: ['admin-trips', showDeletedTrips],
@@ -68,6 +76,8 @@ export default function Admin() {
     e.preventDefault();
     if (password === "olami2025") {
       setIsAuthenticated(true);
+      // Store authentication state in session storage
+      sessionStorage.setItem("adminAuthenticated", "true");
       toast({
         title: "Success",
         description: "Welcome to the admin panel",
