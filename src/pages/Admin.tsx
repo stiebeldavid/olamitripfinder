@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Pencil, Copy } from "lucide-react";
+import { Loader2, Pencil, Copy, Eye, EyeOff } from "lucide-react";
 import { Trip, TripLocation } from "@/types/trip";
 import {
   Select,
@@ -15,20 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [isDuplicating, setIsDuplicating] = useState(false);
+  const [showDeletedTrips, setShowDeletedTrips] = useState(false);
   const { toast } = useToast();
 
   const { data: trips, refetch } = useQuery({
-    queryKey: ['admin-trips'],
+    queryKey: ['admin-trips', showDeletedTrips],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('trips')
         .select('*')
         .order('start_date', { ascending: true });
+        
+      // Only filter out deleted trips if showDeletedTrips is false
+      if (!showDeletedTrips) {
+        query = query.neq('show_trip', 'Deleted');
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
@@ -90,6 +99,10 @@ export default function Admin() {
       });
       refetch();
     }
+  };
+
+  const toggleShowDeletedTrips = () => {
+    setShowDeletedTrips(prev => !prev);
   };
 
   const duplicateTrip = async (trip: Trip) => {
@@ -243,6 +256,27 @@ export default function Admin() {
           </Link>
         </div>
       </div>
+      
+      <div className="flex items-center space-x-2 mb-6">
+        <Switch
+          id="show-deleted"
+          checked={showDeletedTrips}
+          onCheckedChange={toggleShowDeletedTrips}
+        />
+        <Label htmlFor="show-deleted" className="cursor-pointer flex items-center">
+          {showDeletedTrips ? (
+            <>
+              <Eye className="h-4 w-4 mr-2" />
+              Showing deleted trips
+            </>
+          ) : (
+            <>
+              <EyeOff className="h-4 w-4 mr-2" />
+              Deleted trips hidden
+            </>
+          )}
+        </Label>
+      </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -267,7 +301,7 @@ export default function Admin() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {trips?.map((trip) => (
-              <tr key={trip.id}>
+              <tr key={trip.id} className={trip.show_trip === "Deleted" ? "bg-gray-100" : ""}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{trip.name}</div>
                 </td>
