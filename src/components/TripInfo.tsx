@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import { Trip } from '@/types/trip';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, CalendarDays, MapPin, Users, External } from 'lucide-react';
+import { Briefcase, CalendarDays, MapPin, Users, ExternalLink } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ImageViewer from './ImageViewer';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,7 +163,7 @@ const TripInfo = ({ trip, onClose }: TripInfoProps) => {
                           <div>
                             <Button className="w-full" asChild>
                               <a href={trip.websiteUrl} target="_blank" rel="noopener noreferrer">
-                                <External className="w-4 h-4 mr-2" />
+                                <ExternalLink className="w-4 h-4 mr-2" />
                                 Visit Website
                               </a>
                             </Button>
