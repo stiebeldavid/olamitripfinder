@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -22,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Trip, TripGender, TripLocation } from "@/types/trip";
 import ImagePreview from "@/components/ImagePreview";
 import ThumbnailSelector from "@/components/ThumbnailSelector";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const getPublicUrl = (path: string | null | undefined): string => {
   if (!path) return "";
@@ -48,6 +50,7 @@ const EditTrip = () => {
   const [videoLinks, setVideoLinks] = useState<string[]>([]);
   const [newVideoLink, setNewVideoLink] = useState("");
   const [thumbnailImage, setThumbnailImage] = useState<string | null>(null);
+  const [isInternship, setIsInternship] = useState(false);
 
   // Load trip data
   const { data: trip, isLoading, refetch } = useQuery({
@@ -97,6 +100,9 @@ const EditTrip = () => {
       if (data.thumbnail_image) {
         setThumbnailImage(getPublicUrl(data.thumbnail_image));
       }
+      
+      // Set internship flag
+      setIsInternship(data.is_internship || false);
 
       return {
         id: data.id,
@@ -113,6 +119,8 @@ const EditTrip = () => {
         gender: data.gender,
         location: data.location,
         spots: data.spots || "",
+        price: data.price || "",
+        isInternship: data.is_internship || false,
         brochureImage: brochureUrl,
         thumbnailImage: data.thumbnail_image ? getPublicUrl(data.thumbnail_image) : null,
         gallery: galleryImages,
@@ -162,6 +170,8 @@ const EditTrip = () => {
         organizer_name: formData.get('organizerName') as string,
         organizer_contact: formData.get('organizerContact') as string,
         show_trip: formData.get('show_trip') as string,
+        price: formData.get('price') as string || null,
+        is_internship: formData.get('isInternship') === 'on'
       };
 
       // Set brochure image if uploaded
@@ -481,15 +491,37 @@ const EditTrip = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="spots">Available Spots (optional)</Label>
-                  <Input
-                    id="spots"
-                    name="spots"
-                    type="number"
-                    min="1"
-                    defaultValue={trip.spots}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="spots">Available Spots (optional)</Label>
+                    <Input
+                      id="spots"
+                      name="spots"
+                      type="number"
+                      min="1"
+                      defaultValue={trip.spots}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="price">Price (optional)</Label>
+                    <Input
+                      id="price"
+                      name="price"
+                      placeholder="e.g., $1,500 USD"
+                      defaultValue={trip.price}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="isInternship" 
+                    name="isInternship" 
+                    checked={isInternship} 
+                    onCheckedChange={(checked) => setIsInternship(checked === true)}
                   />
+                  <Label htmlFor="isInternship">This is an internship program</Label>
                 </div>
 
                 <div>
