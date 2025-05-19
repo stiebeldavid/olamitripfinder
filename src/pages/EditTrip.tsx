@@ -540,7 +540,7 @@ const EditTrip = () => {
                       <ImagePreview
                         src={brochurePreview}
                         alt="Brochure preview"
-                        onDelete={(e) => {
+                        onDelete={() => {
                           setBrochureFile(null);
                           setBrochurePreview(prev => {
                             if (prev) URL.revokeObjectURL(prev);
