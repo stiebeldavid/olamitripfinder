@@ -190,7 +190,7 @@ export type Database = {
     }
     Enums: {
       trip_gender: "mixed" | "male" | "female"
-      trip_location: "united_states" | "international"
+      trip_location: "united_states" | "international" | "israel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -307,7 +307,7 @@ export const Constants = {
   public: {
     Enums: {
       trip_gender: ["mixed", "male", "female"],
-      trip_location: ["united_states", "international"],
+      trip_location: ["united_states", "international", "israel"],
     },
   },
 } as const

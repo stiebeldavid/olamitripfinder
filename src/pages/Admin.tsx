@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Pencil, Copy } from "lucide-react";
-import { Trip } from "@/types/trip";
+import { Trip, TripLocation } from "@/types/trip";
 import {
   Select,
   SelectContent,
@@ -138,7 +137,7 @@ export default function Admin() {
           description: trip.description,
           start_date: trip.startDate,
           end_date: trip.endDate,
-          location: trip.location,
+          location: trip.location as TripLocation,
           gender: trip.gender,
           spots: trip.spots,
           website_url: trip.websiteUrl,

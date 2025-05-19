@@ -247,6 +247,7 @@ const AddTrip = () => {
                       <SelectContent>
                         <SelectItem value="united_states">United States</SelectItem>
                         <SelectItem value="international">International</SelectItem>
+                        <SelectItem value="israel">Israel</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

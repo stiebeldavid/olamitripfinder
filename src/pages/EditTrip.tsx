@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -386,7 +385,7 @@ const EditTrip = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="israel">Israel</SelectItem>
-                        <SelectItem value="us">United States</SelectItem>
+                        <SelectItem value="united_states">United States</SelectItem>
                         <SelectItem value="international">International</SelectItem>
                       </SelectContent>
                     </Select>
