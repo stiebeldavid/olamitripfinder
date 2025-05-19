@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -110,14 +111,14 @@ export default function Admin() {
       setIsDuplicating(true);
 
       // Get the next available trip_id
-      const { data: maxTripId } = await supabase
+      const { data: maxTripIdResult } = await supabase
         .from('trips')
         .select('trip_id')
         .order('trip_id', { ascending: false })
         .limit(1)
         .single();
 
-      const newTripId = (maxTripId?.trip_id || 0) + 1;
+      const newTripId = (maxTripIdResult?.trip_id || 0) + 1;
 
       // Copy brochure image if it exists
       let newBrochureImagePath = null;
@@ -141,11 +142,11 @@ export default function Admin() {
         }
       }
 
-      // Create the new trip
+      // Create the new trip with the new trip_id
       const { data: newTrip, error: tripError } = await supabase
         .from('trips')
         .insert({
-          trip_id: newTripId,
+          trip_id: newTripId, // Using the calculated next trip_id
           name: `${trip.name} - Copy`,
           description: trip.description,
           start_date: trip.startDate,

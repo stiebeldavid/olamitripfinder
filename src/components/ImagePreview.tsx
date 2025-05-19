@@ -16,7 +16,7 @@ const ImagePreview = ({
   showDelete = true 
 }: ImagePreviewProps) => {
   return (
-    <div className="relative inline-block group">
+    <div className="relative inline-block">
       <img
         src={src}
         alt={alt}
@@ -26,7 +26,7 @@ const ImagePreview = ({
         <Button
           variant="destructive"
           size="icon"
-          className="absolute -top-2 -right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-2 -right-2 h-8 w-8"
           onClick={(e) => {
             e.preventDefault(); // Prevent form submission
             onDelete();
