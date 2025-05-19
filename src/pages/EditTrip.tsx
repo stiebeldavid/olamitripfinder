@@ -36,46 +36,72 @@ const EditTrip = () => {
   const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
+  // Add debugging logs for initial params
+  console.log('EditTrip: Component mounted with tripId:', tripId);
+
   const { data: trip, isLoading, error } = useQuery({
     queryKey: ['trip', tripId],
     queryFn: async () => {
-      if (!tripId) throw new Error("Trip ID is required");
+      console.log('EditTrip: Starting fetch for tripId:', tripId);
       
-      const { data, error } = await supabase
-        .from('trips')
-        .select(`
-          *,
-          gallery:trip_gallery(image_path),
-          videos:trip_videos(video_url)
-        `)
-        .eq('trip_id', parseInt(tripId))
-        .single();
-
-      if (error) {
-        console.error("Error fetching trip:", error);
-        throw error;
+      if (!tripId) {
+        console.error('EditTrip: No tripId provided');
+        throw new Error("Trip ID is required");
       }
+      
+      try {
+        console.log('EditTrip: Fetching trip with ID:', tripId);
+        
+        const { data, error } = await supabase
+          .from('trips')
+          .select(`
+            *,
+            gallery:trip_gallery(image_path),
+            videos:trip_videos(video_url)
+          `)
+          .eq('trip_id', parseInt(tripId))
+          .single();
 
-      if (!data) {
-        throw new Error("Trip not found");
+        if (error) {
+          console.error("EditTrip: Error fetching trip data:", error);
+          throw error;
+        }
+
+        if (!data) {
+          console.error("EditTrip: No data returned for trip ID:", tripId);
+          throw new Error("Trip not found");
+        }
+
+        console.log('EditTrip: Successfully fetched trip data:', data);
+
+        // Process gallery images to get public URLs
+        if (data.gallery) {
+          console.log('EditTrip: Processing gallery images');
+          data.gallery = await Promise.all(data.gallery.map(async (image: { image_path: string }) => {
+            const { data: publicUrl } = supabase.storage
+              .from('trip-photos')
+              .getPublicUrl(image.image_path);
+            return { ...image, publicUrl: publicUrl.publicUrl };
+          }));
+        }
+
+        console.log('EditTrip: Returning processed trip data');
+        return data;
+      } catch (fetchError) {
+        console.error('EditTrip: Exception during fetch:', fetchError);
+        throw fetchError;
       }
-
-      // Process gallery images to get public URLs
-      if (data.gallery) {
-        data.gallery = await Promise.all(data.gallery.map(async (image: { image_path: string }) => {
-          const { data: publicUrl } = supabase.storage
-            .from('trip-photos')
-            .getPublicUrl(image.image_path);
-          return { ...image, publicUrl: publicUrl.publicUrl };
-        }));
-      }
-
-      return data;
     },
+    enabled: !!tripId,
   });
 
   useEffect(() => {
+    console.log('EditTrip: Effect triggered with trip data:', trip);
     if (trip) {
+      console.log('EditTrip: Setting dates from trip data:', {
+        start: trip.start_date,
+        end: trip.end_date
+      });
       setStartDate(new Date(trip.start_date));
       setEndDate(new Date(trip.end_date));
     }
@@ -90,6 +116,8 @@ const EditTrip = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('EditTrip: Form submitted with tripId:', tripId);
+    
     if (!startDate || !endDate) {
       toast({
         title: "Error",
@@ -103,13 +131,19 @@ const EditTrip = () => {
     const formData = new FormData(e.currentTarget);
 
     try {
+      console.log('EditTrip: Processing form submission');
       let brochureImagePath = trip?.brochure_image_path;
+      
       if (brochureFile) {
+        console.log('EditTrip: Uploading new brochure file');
         const { data: brochureData, error: brochureError } = await supabase.storage
           .from('trip-photos')
           .upload(`brochures/${Date.now()}-${brochureFile.name}`, brochureFile);
         
-        if (brochureError) throw brochureError;
+        if (brochureError) {
+          console.error('EditTrip: Error uploading brochure:', brochureError);
+          throw brochureError;
+        }
         brochureImagePath = brochureData.path;
       }
 
@@ -117,6 +151,8 @@ const EditTrip = () => {
         throw new Error("Trip ID is required");
       }
 
+      console.log('EditTrip: Updating trip in database with ID:', tripId);
+      
       const { error: tripError } = await supabase
         .from('trips')
         .update({
@@ -134,9 +170,13 @@ const EditTrip = () => {
         })
         .eq('trip_id', parseInt(tripId));
 
-      if (tripError) throw tripError;
+      if (tripError) {
+        console.error('EditTrip: Error updating trip data:', tripError);
+        throw tripError;
+      }
 
       if (galleryFiles.length > 0) {
+        console.log('EditTrip: Uploading gallery files');
         const galleryPromises = galleryFiles.map(async (file) => {
           const { data: imageData, error: imageError } = await supabase.storage
             .from('trip-photos')
@@ -147,7 +187,7 @@ const EditTrip = () => {
           const { error: galleryError } = await supabase
             .from('trip_gallery')
             .insert({
-              trip_id: trip.id,
+              trip_id: trip?.id,
               image_path: imageData.path,
             });
           
@@ -157,6 +197,7 @@ const EditTrip = () => {
         await Promise.all(galleryPromises);
       }
 
+      console.log('EditTrip: Trip update successful, redirecting to homepage');
       toast({
         title: "Success",
         description: "Trip updated successfully",
@@ -164,7 +205,7 @@ const EditTrip = () => {
 
       navigate('/');
     } catch (error) {
-      console.error('Error updating trip:', error);
+      console.error('EditTrip: Error updating trip:', error);
       toast({
         title: "Error",
         description: "Failed to update trip. Please try again.",
@@ -257,6 +298,7 @@ const EditTrip = () => {
   };
 
   if (isLoading) {
+    console.log('EditTrip: Rendering loading state');
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-4">
@@ -279,6 +321,7 @@ const EditTrip = () => {
   }
 
   if (error || !trip) {
+    console.error('EditTrip: Rendering error state with error:', error);
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-4">
@@ -295,6 +338,9 @@ const EditTrip = () => {
     );
   }
 
+  console.log('EditTrip: Rendering form with trip data:', trip);
+  
+  // Render the form
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
@@ -457,7 +503,7 @@ const EditTrip = () => {
                             await handleDeleteBrochure();
                           }
                         }}
-                        showDelete={false}
+                        showDelete={true}
                       />
                     </div>
                   )}
@@ -479,7 +525,7 @@ const EditTrip = () => {
                         src={image.publicUrl}
                         alt="Gallery image"
                         onDelete={() => handleDeleteGalleryImage(image.image_path)}
-                        showDelete={false}
+                        showDelete={true}
                       />
                     ))}
                     {galleryPreviews.map((preview, index) => (
@@ -502,7 +548,7 @@ const EditTrip = () => {
                             if (input) input.value = '';
                           }
                         }}
-                        showDelete={false}
+                        showDelete={true}
                       />
                     ))}
                   </div>
