@@ -14,8 +14,15 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   src,
   alt,
   onDelete,
-  showDelete = true // Change default to true so delete button is visible by default
+  showDelete = true
 }) => {
+  // Prevent the click event from bubbling up to parent elements
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) onDelete();
+  };
+
   return (
     <div className="relative rounded-md overflow-hidden h-20 w-20">
       <img
@@ -28,7 +35,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
           variant="destructive"
           size="icon"
           className="absolute top-0 right-0 h-6 w-6 rounded-full opacity-100"
-          onClick={onDelete}
+          onClick={handleDelete}
         >
           <X className="h-4 w-4" />
         </Button>

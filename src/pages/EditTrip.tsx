@@ -50,7 +50,7 @@ const EditTrip = () => {
   const [thumbnailImage, setThumbnailImage] = useState<string | null>(null);
 
   // Load trip data
-  const { data: trip, isLoading } = useQuery({
+  const { data: trip, isLoading, refetch } = useQuery({
     queryKey: ['trip', tripId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -300,6 +300,9 @@ const EditTrip = () => {
           .eq('id', trip?.id);
       }
 
+      // Refetch trip data to ensure UI is up to date
+      refetch();
+
       toast({
         description: "Image deleted successfully",
       });
@@ -515,7 +518,7 @@ const EditTrip = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="brochureImage">Brochure Image</Label>
-                  {trip.brochureImage && !brochurePreview && (
+                  {trip?.brochureImage && !brochurePreview && (
                     <div className="mb-2">
                       <p className="text-sm text-gray-500 mb-2">Current brochure image:</p>
                       <ImagePreview
@@ -537,7 +540,7 @@ const EditTrip = () => {
                       <ImagePreview
                         src={brochurePreview}
                         alt="Brochure preview"
-                        onDelete={() => {
+                        onDelete={(e) => {
                           setBrochureFile(null);
                           setBrochurePreview(prev => {
                             if (prev) URL.revokeObjectURL(prev);
