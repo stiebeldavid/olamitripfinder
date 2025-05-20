@@ -13,7 +13,8 @@ import {
   Contact,
   Image as ImageIcon,
   X,
-  Video
+  Video,
+  Download
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +35,7 @@ const getPublicUrl = (path: string | null | undefined): string => {
 const TripInfo = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
   
   const { data: trip, isLoading } = useQuery({
     queryKey: ['trip', tripId],
@@ -106,6 +108,23 @@ const TripInfo = () => {
     );
   }
 
+  const handleDownload = (imageUrl: string) => {
+    // Extract the filename from the URL
+    const filename = imageUrl.split('/').pop() || 'download.jpg';
+    
+    // Create a temporary anchor element
+    const anchor = document.createElement('a');
+    anchor.href = imageUrl;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    
+    // Trigger click event to download the image
+    anchor.click();
+    
+    // Clean up
+    document.body.removeChild(anchor);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip.name}</h1>
@@ -132,7 +151,7 @@ const TripInfo = () => {
           
           {trip.gallery && trip.gallery.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Gallery</h2>
+              <h2 className="text-xl font-semibold mb-2">Photos & Flyers</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {trip.gallery.map((imageUrl, index) => (
                   <div 
@@ -157,16 +176,19 @@ const TripInfo = () => {
           {trip.videoLinks && trip.videoLinks.length > 0 && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-2">Videos</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {trip.videoLinks.map((videoUrl, index) => (
-                  <div key={index} className="aspect-video bg-gray-100 rounded overflow-hidden">
-                    <iframe
-                      src={videoUrl}
-                      title={`Video ${index + 1}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full rounded"
-                    ></iframe>
+                  <div 
+                    key={index} 
+                    className="aspect-video bg-gray-100 rounded overflow-hidden cursor-pointer relative group"
+                    onClick={() => setSelectedVideoUrl(videoUrl)}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Video className="h-12 w-12 text-gray-500 group-hover:text-primary transition-colors" />
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 text-xs text-center bg-black bg-opacity-60 text-white p-1 rounded">
+                      Video {index + 1}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -237,7 +259,30 @@ const TripInfo = () => {
           src={selectedImageUrl} 
           alt={trip.name}
           onClose={() => setSelectedImageUrl(null)} 
+          onDownload={() => handleDownload(selectedImageUrl)}
         />
+      )}
+
+      {selectedVideoUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 text-white hover:bg-white/20"
+            onClick={() => setSelectedVideoUrl(null)}
+          >
+            <X className="w-6 h-6" />
+          </Button>
+          <div className="w-full max-w-4xl max-h-[80vh] aspect-video">
+            <iframe
+              src={selectedVideoUrl}
+              title="Video Player"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
       )}
     </div>
   );
