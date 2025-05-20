@@ -14,15 +14,28 @@ import { useLocation, useParams, Link } from "react-router-dom";
 import "../styles/imageEffects.css";
 const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
 const FEMALE_ICON = "/lovable-uploads/7af95e23-203a-474c-a7d0-eae2ecd815ea.png";
+
 const getPublicUrl = (path: string | null | undefined): string => {
   if (!path) return DEFAULT_IMAGE;
-  const {
-    data: {
-      publicUrl
-    }
-  } = supabase.storage.from('trip-photos').getPublicUrl(path);
-  return publicUrl || DEFAULT_IMAGE;
+  
+  // Check if path is already a full URL
+  if (path.startsWith('http')) {
+    return path;
+  }
+  
+  try {
+    const {
+      data: {
+        publicUrl
+      }
+    } = supabase.storage.from('trip-photos').getPublicUrl(path);
+    return publicUrl || DEFAULT_IMAGE;
+  } catch (error) {
+    console.error(`Failed to get public URL for ${path}:`, error);
+    return DEFAULT_IMAGE;
+  }
 };
+
 const fetchTrips = async (): Promise<Trip[]> => {
   const { data, error } = await supabase
     .from('trips')
@@ -74,6 +87,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
     };
   });
 };
+
 const getGenderIcon = (gender: string) => {
   switch (gender) {
     case 'female':
@@ -85,6 +99,7 @@ const getGenderIcon = (gender: string) => {
       return <Users className="w-4 h-4" />;
   }
 };
+
 const Index = () => {
   const location = useLocation();
   const params = useParams();

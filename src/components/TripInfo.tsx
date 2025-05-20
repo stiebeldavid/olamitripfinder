@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Dialog } from "@headlessui/react";
@@ -22,14 +21,29 @@ import type { Trip } from "@/types/trip";
 import TripPrice from "./TripPrice";
 import ImageViewer from "./ImageViewer";
 
+const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+
 const getPublicUrl = (path: string | null | undefined): string => {
-  if (!path) return "";
-  const {
-    data: {
-      publicUrl
-    }
-  } = supabase.storage.from('trip-photos').getPublicUrl(path);
-  return publicUrl || "";
+  if (!path) return DEFAULT_IMAGE;
+  
+  // Check if path is already a full URL
+  if (path.startsWith('http')) {
+    return path;
+  }
+  
+  try {
+    const {
+      data: {
+        publicUrl
+      }
+    } = supabase.storage.from('trip-photos').getPublicUrl(path);
+    
+    console.log(`Generated public URL for ${path}: ${publicUrl}`);
+    return publicUrl || DEFAULT_IMAGE;
+  } catch (error) {
+    console.error(`Failed to get public URL for ${path}:`, error);
+    return DEFAULT_IMAGE;
+  }
 };
 
 const TripInfo = () => {
@@ -59,7 +73,11 @@ const TripInfo = () => {
       const brochureUrl = data.brochure_image_path ? getPublicUrl(data.brochure_image_path) : "";
       
       // Get gallery image URLs
-      const galleryImages = data.gallery?.map((g: any) => getPublicUrl(g.image_path)) || [];
+      const galleryImages = data.gallery?.map((g: any) => {
+        const url = getPublicUrl(g.image_path);
+        console.log(`Processing gallery image: ${g.image_path} -> ${url}`);
+        return url;
+      }) || [];
 
       return {
         id: data.id,
@@ -127,31 +145,35 @@ const TripInfo = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip.name}</h1>
+      <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip?.name}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          {trip.brochureImage && (
+          {trip?.brochureImage && (
             <div className="mb-6">
               <img
                 src={trip.brochureImage}
                 alt={trip.name}
                 className="w-full rounded-lg object-cover max-h-[500px]"
                 onClick={() => setSelectedImageUrl(trip.brochureImage || null)}
+                onError={(e) => {
+                  console.error(`Failed to load brochure image: ${trip.brochureImage}`);
+                  (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                }}
               />
             </div>
           )}
           
-          {trip.description && (
+          {trip?.description && (
             <div className="mb-6 prose max-w-none">
               <h2 className="text-xl font-semibold mb-2">About This Trip</h2>
               <p className="whitespace-pre-line">{trip.description}</p>
             </div>
           )}
           
-          {trip.gallery && trip.gallery.length > 0 && (
+          {trip?.gallery && trip.gallery.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Photos & Flyers</h2>
+              <h2 className="text-xl font-semibold mb-2">Photos, Videos & Flyers</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {trip.gallery.map((imageUrl, index) => (
                   <div 
@@ -163,6 +185,10 @@ const TripInfo = () => {
                       src={imageUrl} 
                       alt={`${trip.name} image ${index + 1}`} 
                       className="w-full h-full object-cover rounded"
+                      onError={(e) => {
+                        console.error(`Failed to load gallery image ${index}: ${imageUrl}`);
+                        (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                      }}
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                       <ImageIcon className="text-white opacity-0 group-hover:opacity-100 h-8 w-8" />
@@ -173,7 +199,7 @@ const TripInfo = () => {
             </div>
           )}
           
-          {trip.videoLinks && trip.videoLinks.length > 0 && (
+          {trip?.videoLinks && trip.videoLinks.length > 0 && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-2">Videos</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -257,9 +283,10 @@ const TripInfo = () => {
       {selectedImageUrl && (
         <ImageViewer 
           src={selectedImageUrl} 
-          alt={trip.name}
+          alt={trip?.name || "Trip image"}
           onClose={() => setSelectedImageUrl(null)} 
           onDownload={() => handleDownload(selectedImageUrl)}
+          tripId={tripId}
         />
       )}
 
