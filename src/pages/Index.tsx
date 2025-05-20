@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, MapPin, User, Home, Heart, Plus, X, Phone, Image, Copy, Pencil, UserCircle2, UserRound, Users } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, X, Phone, Image, Copy, Users, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import type { Trip } from "@/types/trip";
+import type { Trip, TripImage } from "@/types/trip";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageViewer from "@/components/ImageViewer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, useParams, Link } from "react-router-dom";
 import "../styles/imageEffects.css";
-const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+
+const DEFAULT_IMAGE = "/placeholder.svg";
 const FEMALE_ICON = "/lovable-uploads/7af95e23-203a-474c-a7d0-eae2ecd815ea.png";
 
 const getPublicUrl = (path: string | null | undefined): string => {
@@ -41,7 +42,7 @@ const fetchTrips = async (): Promise<Trip[]> => {
     .from('trips')
     .select(`
       *,
-      gallery:trip_gallery(image_path),
+      trip_images:trip_images(id, image_path, is_thumbnail, is_flyer),
       videos:trip_videos(video_url)
     `)
     .eq('show_trip', 'Show')
@@ -50,19 +51,13 @@ const fetchTrips = async (): Promise<Trip[]> => {
   if (error) throw error;
   
   return data.map(trip => {
-    // Determine which image to use as the card thumbnail
-    let thumbnailImage = DEFAULT_IMAGE;
-    
-    if (trip.thumbnail_image) {
-      // If a thumbnail is specifically selected, use that
-      thumbnailImage = getPublicUrl(trip.thumbnail_image);
-    } else if (trip.brochure_image_path) {
-      // Otherwise use the brochure image
-      thumbnailImage = getPublicUrl(trip.brochure_image_path);
-    }
-    
-    // Log for debugging
-    console.log(`Trip ${trip.name} - Thumbnail: ${trip.thumbnail_image}, Using: ${thumbnailImage}`);
+    // Process images with the new structure
+    const images: TripImage[] = trip.trip_images?.map((img: any) => ({
+      id: img.id,
+      url: getPublicUrl(img.image_path),
+      isThumbnail: img.is_thumbnail || false,
+      isFlyer: img.is_flyer || false
+    })) || [];
     
     return {
       id: trip.id,
@@ -79,11 +74,10 @@ const fetchTrips = async (): Promise<Trip[]> => {
       gender: trip.gender,
       location: trip.location,
       spots: trip.spots,
-      brochureImage: getPublicUrl(trip.brochure_image_path), // Always keep brochure image for the popup
-      thumbnailImage: thumbnailImage, // New field for card display
-      gallery: trip.gallery?.map(g => getPublicUrl(g.image_path)) || [],
-      videoLinks: trip.videos?.map(v => v.video_url) || [],
-      show_trip: trip.show_trip
+      images: images,
+      videoLinks: trip.videos?.map((v: any) => v.video_url) || [],
+      show_trip: trip.show_trip,
+      price: trip.price
     };
   });
 };
@@ -103,9 +97,7 @@ const getGenderIcon = (gender: string) => {
 const Index = () => {
   const location = useLocation();
   const params = useParams();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -123,6 +115,7 @@ const Index = () => {
     }
   });
   const [showMobileGallery, setShowMobileGallery] = useState(false);
+
   const {
     data: trips,
     isLoading,
@@ -131,6 +124,7 @@ const Index = () => {
     queryKey: ['trips'],
     queryFn: fetchTrips
   });
+
   useEffect(() => {
     if (trips && params.tripId) {
       const tripId = parseInt(params.tripId);
@@ -140,12 +134,14 @@ const Index = () => {
       }
     }
   }, [params.tripId, trips]);
+
   const filteredTrips = trips?.filter(trip => {
     const searchMatch = trip.name.toLowerCase().includes(searchQuery.toLowerCase()) || trip.description.toLowerCase().includes(searchQuery.toLowerCase()) || trip.organizer.name.toLowerCase().includes(searchQuery.toLowerCase());
     const genderMatch = trip.gender === 'mixed' && filters.gender.mixed || trip.gender === 'male' && filters.gender.male || trip.gender === 'female' && filters.gender.female;
     const locationMatch = trip.location === 'united_states' && filters.location.united_states || trip.location === 'international' && filters.location.international;
     return searchMatch && genderMatch && locationMatch;
   });
+
   const groupTripsByMonth = (trips: Trip[]) => {
     return trips?.reduce((acc, trip) => {
       const month = format(new Date(trip.startDate), 'MMMM yyyy');
@@ -156,6 +152,7 @@ const Index = () => {
       return acc;
     }, {} as Record<string, Trip[]>);
   };
+
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = parseISO(startDate);
     const end = parseISO(endDate);
@@ -176,49 +173,57 @@ const Index = () => {
     
     return `${format(start, startFormatString)} - ${format(end, endFormatString)}`;
   };
-  const TripCard = ({ trip }: { trip: Trip; }) => (
-    <div key={trip.id} className="relative group overflow-hidden cursor-pointer" onClick={() => setSelectedTrip(trip)}>
-      <div className="relative h-[140px] md:h-[280px]">
-        <img 
-          src={trip.thumbnailImage} 
-          alt={trip.name} 
-          className="w-full h-full object-cover" 
-          onError={(e) => {
-            // If image fails to load, fallback to default
-            console.log(`Image failed to load: ${(e.target as HTMLImageElement).src}`);
-            (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
-        <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
-          {formatDateRange(trip.startDate, trip.endDate)}
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
-          <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
-            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
-              {getGenderIcon(trip.gender)}
-              <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
-            </div>
+
+  const TripCard = ({ trip }: { trip: Trip; }) => {
+    // Get thumbnail image or fallback to flyer image or first image
+    const thumbnailImage = trip.images.find(img => img.isThumbnail)?.url;
+    const flyerImage = trip.images.find(img => img.isFlyer)?.url;
+    const imageUrl = thumbnailImage || flyerImage || trip.images[0]?.url || DEFAULT_IMAGE;
+
+    return (
+      <div key={trip.id} className="relative group overflow-hidden cursor-pointer" onClick={() => setSelectedTrip(trip)}>
+        <div className="relative h-[140px] md:h-[280px]">
+          <img 
+            src={imageUrl} 
+            alt={trip.name} 
+            className="w-full h-full object-cover" 
+            onError={(e) => {
+              console.log(`Image failed to load: ${(e.target as HTMLImageElement).src}`);
+              (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/80" />
+          <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-sm rounded">
+            {formatDateRange(trip.startDate, trip.endDate)}
           </div>
-          <div className="flex gap-2">
-            <div className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none px-4 py-2 rounded text-center">
-              Learn More
-            </div>
-            {trip.spots != null && (
-              <div className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center">
-                {trip.spots} spots left
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{trip.name}</h3>
+            <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
+              <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm capitalize">{trip.location.replace('_', ' ')}</span>
               </div>
-            )}
+              <div className="flex items-center gap-1 bg-black/30 px-2 py-1">
+                {getGenderIcon(trip.gender)}
+                <span className="text-sm capitalize">{trip.gender === 'mixed' ? 'Co-ed' : trip.gender}</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none px-4 py-2 rounded text-center">
+                Learn More
+              </div>
+              {trip.spots != null && (
+                <div className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/30 px-4 py-2 rounded text-center">
+                  {trip.spots} spots left
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
   const FilterSection = () => <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
       <div className="bg-white p-6 rounded-lg shadow-sm space-y-6 md:sticky md:top-20 md:self-start">
         <div>
@@ -308,6 +313,7 @@ const Index = () => {
           </div>}
       </div>
     </div>;
+
   if (error) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -316,7 +322,9 @@ const Index = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gray-50 pb-14">
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-14">
       <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="h-8 flex items-center">
@@ -399,7 +407,7 @@ const Index = () => {
                       <span className="text-gray-600 capitalize">{selectedTrip.location.replace('_', ' ')}</span>
                     </div>
                     {selectedTrip.spots != null && <div className="flex items-center gap-2">
-                        <User className="w-5 h-5 text-primary" />
+                        <Users className="w-5 h-5 text-primary" />
                         <span className="text-gray-600">{selectedTrip.spots} spots available</span>
                       </div>}
                   </div>
@@ -446,59 +454,136 @@ const Index = () => {
                 </div>
 
                 <div>
-                  <img 
-                    src={selectedTrip.brochureImage || DEFAULT_IMAGE} 
-                    alt={selectedTrip.name} 
-                    className="w-full rounded-lg cursor-pointer mb-6" 
-                    onClick={() => setSelectedImage(selectedTrip.brochureImage || DEFAULT_IMAGE)} 
-                  />
+                  {/* Display the flyer image if available */}
+                  {selectedTrip.images.find(img => img.isFlyer) && (
+                    <img 
+                      src={selectedTrip.images.find(img => img.isFlyer)?.url || DEFAULT_IMAGE} 
+                      alt={selectedTrip.name} 
+                      className="w-full rounded-lg cursor-pointer mb-6" 
+                      onClick={() => setSelectedImage(selectedTrip.images.find(img => img.isFlyer)?.url || DEFAULT_IMAGE)} 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                      }}
+                    />
+                  )}
                 </div>
               </div>
 
-              {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && <div className="mt-8">
+              {selectedTrip.videoLinks && selectedTrip.videoLinks.length > 0 && (
+                <div className="mt-8">
                   <h4 className="font-medium text-lg mb-4">Videos</h4>
                   <div className="space-y-4">
-                    {selectedTrip.videoLinks.map((video, index) => <div key={index} className="aspect-video">
+                    {selectedTrip.videoLinks.map((video, index) => (
+                      <div key={index} className="aspect-video">
                         <iframe src={video} className="w-full h-full rounded-lg" allowFullScreen />
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
-                </div>}
+                </div>
+              )}
 
-              {selectedTrip.gallery && selectedTrip.gallery.length > 0 && <div className="mt-8">
+              {/* Show all non-flyer images in the gallery */}
+              {selectedTrip.images.filter(img => !img.isFlyer).length > 0 && (
+                <div className="mt-8">
                   <h4 className="font-medium text-lg mb-4">Photos from past trips</h4>
                   <div className="block md:hidden">
-                    <Button variant="outline" className="w-full mb-4" onClick={() => setShowMobileGallery(!showMobileGallery)}>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mb-4" 
+                      onClick={() => setShowMobileGallery(!showMobileGallery)}
+                    >
                       <Image className="w-4 h-4 mr-2" />
-                      {showMobileGallery ? 'Hide Photos' : `See ${selectedTrip.gallery.length} Previous Trip Photos`}
+                      {showMobileGallery ? 'Hide Photos' : `See ${selectedTrip.images.filter(img => !img.isFlyer).length} Previous Trip Photos`}
                     </Button>
-                    {showMobileGallery && <div className="grid grid-cols-2 gap-2">
-                        {selectedTrip.gallery.map((image, index) => <div key={index} className="aspect-square rounded-lg overflow-hidden cursor-pointer" onClick={() => setSelectedImage(image)}>
-                            <img src={image} alt={`Trip photo ${index + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform" />
-                          </div>)}
-                      </div>}
+                    {showMobileGallery && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedTrip.images.filter(img => !img.isFlyer).map((image, index) => (
+                          <div 
+                            key={image.id} 
+                            className="aspect-square rounded-lg overflow-hidden cursor-pointer" 
+                            onClick={() => setSelectedImage(image.url)}
+                          >
+                            <img 
+                              src={image.url} 
+                              alt={`Trip photo ${index + 1}`} 
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                              }}
+                            />
+                            {image.isThumbnail && (
+                              <div className="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded">
+                                Thumbnail
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="hidden md:block w-full">
                     <Carousel className="w-full">
                       <CarouselContent>
-                        {selectedTrip.gallery.map((image, index) => <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                            <div className="aspect-square rounded-lg overflow-hidden cursor-pointer" onClick={() => setSelectedImage(image)}>
-                              <img src={image} alt={`Trip photo ${index + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                        {selectedTrip.images.filter(img => !img.isFlyer).map((image, index) => (
+                          <CarouselItem key={image.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                            <div 
+                              className="aspect-square rounded-lg overflow-hidden cursor-pointer relative" 
+                              onClick={() => setSelectedImage(image.url)}
+                            >
+                              <img 
+                                src={image.url} 
+                                alt={`Trip photo ${index + 1}`} 
+                                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                                }}
+                              />
+                              {image.isThumbnail && (
+                                <div className="absolute top-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded">
+                                  Thumbnail
+                                </div>
+                              )}
                             </div>
-                          </CarouselItem>)}
+                          </CarouselItem>
+                        ))}
                       </CarouselContent>
                       <CarouselPrevious />
                       <CarouselNext />
                     </Carousel>
                   </div>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {selectedImage && <ImageViewer src={selectedImage} alt="Trip image" onClose={() => setSelectedImage(null)} />}
+      {selectedImage && (
+        <ImageViewer 
+          src={selectedImage} 
+          alt="Trip image" 
+          onClose={() => setSelectedImage(null)}
+          onDownload={() => {
+            // Extract the filename from the URL
+            const filename = selectedImage.split('/').pop() || 'trip-image.jpg';
+            
+            // Create a temporary anchor element
+            const anchor = document.createElement('a');
+            anchor.href = selectedImage;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            
+            // Trigger click event to download the image
+            anchor.click();
+            
+            // Clean up
+            document.body.removeChild(anchor);
+          }} 
+        />
+      )}
 
-      {showContactInfo && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      {showContactInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-medium">Have Questions?</h2>
@@ -524,7 +609,10 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default Index;

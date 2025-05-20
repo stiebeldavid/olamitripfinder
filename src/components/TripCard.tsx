@@ -18,7 +18,10 @@ const TripCard = ({ trip, className }: TripCardProps) => {
   const formattedStartDate = format(parseISO(trip.startDate), "MMM d, yyyy");
   const formattedEndDate = format(parseISO(trip.endDate), "MMM d, yyyy");
 
-  const imageUrl = trip.thumbnailImage || trip.brochureImage || "/placeholder.svg";
+  // Get thumbnail image or fallback to flyer image or default
+  const thumbnailImage = trip.images.find(img => img.isThumbnail)?.url;
+  const flyerImage = trip.images.find(img => img.isFlyer)?.url;
+  const imageUrl = thumbnailImage || flyerImage || trip.images[0]?.url || "/placeholder.svg";
 
   return (
     <Card className={cn("overflow-hidden", className)}>

@@ -1,27 +1,24 @@
+
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { 
   Calendar as CalendarIcon, 
   MapPin, 
   Users, 
   ExternalLink,
-  Contact,
-  Image as ImageIcon,
   X,
   Video,
   Download
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Trip } from "@/types/trip";
+import type { Trip, TripImage } from "@/types/trip";
 import TripPrice from "./TripPrice";
 import ImageViewer from "./ImageViewer";
 
-const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+const DEFAULT_IMAGE = "/placeholder.svg";
 
 const getPublicUrl = (path: string | null | undefined): string => {
   if (!path) return DEFAULT_IMAGE;
@@ -38,7 +35,6 @@ const getPublicUrl = (path: string | null | undefined): string => {
       }
     } = supabase.storage.from('trip-photos').getPublicUrl(path);
     
-    console.log(`Generated public URL for ${path}: ${publicUrl}`);
     return publicUrl || DEFAULT_IMAGE;
   } catch (error) {
     console.error(`Failed to get public URL for ${path}:`, error);
@@ -60,7 +56,7 @@ const TripInfo = () => {
         .from('trips')
         .select(`
           *,
-          gallery:trip_gallery(id, image_path),
+          trip_images:trip_images(id, image_path, is_thumbnail, is_flyer),
           videos:trip_videos(id, video_url)
         `)
         .eq('trip_id', parseInt(tripId))
@@ -69,16 +65,16 @@ const TripInfo = () => {
       if (error) throw error;
       if (!data) throw new Error('Trip not found');
 
-      // Get brochure image URL
-      const brochureUrl = data.brochure_image_path ? getPublicUrl(data.brochure_image_path) : "";
+      // Process images with the new structure
+      const images: TripImage[] = data.trip_images?.map((img: any) => ({
+        id: img.id,
+        url: getPublicUrl(img.image_path),
+        isThumbnail: img.is_thumbnail || false,
+        isFlyer: img.is_flyer || false
+      })) || [];
       
-      // Get gallery image URLs
-      const galleryImages = data.gallery?.map((g: any) => {
-        const url = getPublicUrl(g.image_path);
-        console.log(`Processing gallery image: ${g.image_path} -> ${url}`);
-        return url;
-      }) || [];
-
+      console.log('Processed images:', images);
+      
       return {
         id: data.id,
         trip_id: data.trip_id,
@@ -95,8 +91,7 @@ const TripInfo = () => {
         location: data.location,
         spots: data.spots,
         price: data.price,
-        brochureImage: brochureUrl,
-        gallery: galleryImages,
+        images: images,
         videoLinks: data.videos?.map((v: any) => v.video_url) || []
       };
     }
@@ -126,6 +121,9 @@ const TripInfo = () => {
     );
   }
 
+  const flyerImage = trip.images.find(img => img.isFlyer)?.url;
+  const otherImages = trip.images.filter(img => !img.isFlyer);
+
   const handleDownload = (imageUrl: string) => {
     // Extract the filename from the URL
     const filename = imageUrl.split('/').pop() || 'download.jpg';
@@ -149,15 +147,15 @@ const TripInfo = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          {trip?.brochureImage && (
+          {flyerImage && (
             <div className="mb-6">
               <img
-                src={trip.brochureImage}
+                src={flyerImage}
                 alt={trip.name}
                 className="w-full rounded-lg object-cover max-h-[500px]"
-                onClick={() => setSelectedImageUrl(trip.brochureImage || null)}
+                onClick={() => setSelectedImageUrl(flyerImage || null)}
                 onError={(e) => {
-                  console.error(`Failed to load brochure image: ${trip.brochureImage}`);
+                  console.error(`Failed to load flyer image: ${flyerImage}`);
                   (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
                 }}
               />
@@ -171,27 +169,31 @@ const TripInfo = () => {
             </div>
           )}
           
-          {trip?.gallery && trip.gallery.length > 0 && (
+          {otherImages.length > 0 && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-2">Photos, Videos & Flyers</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {trip.gallery.map((imageUrl, index) => (
+                {otherImages.map((image, index) => (
                   <div 
-                    key={index} 
+                    key={image.id} 
                     className="aspect-square cursor-pointer relative group"
-                    onClick={() => setSelectedImageUrl(imageUrl)}
+                    onClick={() => setSelectedImageUrl(image.url)}
                   >
                     <img 
-                      src={imageUrl} 
+                      src={image.url} 
                       alt={`${trip.name} image ${index + 1}`} 
                       className="w-full h-full object-cover rounded"
                       onError={(e) => {
-                        console.error(`Failed to load gallery image ${index}: ${imageUrl}`);
+                        console.error(`Failed to load gallery image: ${image.url}`);
                         (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
                       }}
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                      <ImageIcon className="text-white opacity-0 group-hover:opacity-100 h-8 w-8" />
+                      {image.isThumbnail && (
+                        <span className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                          Thumbnail
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

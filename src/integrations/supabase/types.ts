@@ -38,6 +38,41 @@ export type Database = {
           },
         ]
       }
+      trip_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_path: string
+          is_flyer: boolean | null
+          is_thumbnail: boolean | null
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_path: string
+          is_flyer?: boolean | null
+          is_thumbnail?: boolean | null
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_path?: string
+          is_flyer?: boolean | null
+          is_thumbnail?: boolean | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_images_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_videos: {
         Row: {
           created_at: string
