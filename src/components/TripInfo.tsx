@@ -29,13 +29,16 @@ const getPublicUrl = (path: string | null | undefined): string => {
   }
   
   try {
+    // Fix: Ensure we're working with a valid path that has proper prefixes
+    const fullPath = path.includes('/') ? path : `trip-photos/${path}`;
+    
     const {
       data: {
         publicUrl
       }
-    } = supabase.storage.from('trip-photos').getPublicUrl(path);
+    } = supabase.storage.from('trip-photos').getPublicUrl(fullPath);
     
-    console.log(`Getting public URL for ${path}: ${publicUrl}`);
+    console.log(`Getting public URL for ${fullPath}: ${publicUrl}`);
     return publicUrl || DEFAULT_IMAGE;
   } catch (error) {
     console.error(`Failed to get public URL for ${path}:`, error);
@@ -69,7 +72,14 @@ const TripInfo = () => {
       // Process images with the new structure
       const images: TripImage[] = data.trip_images?.map((img: any) => {
         console.log("Processing image:", img);
-        const url = getPublicUrl(img.image_path);
+        
+        // Fix: Ensure image_path is properly formatted
+        const imagePath = img.image_path || "";
+        console.log("Raw image path:", imagePath);
+        
+        const url = getPublicUrl(imagePath);
+        console.log("Generated public URL:", url);
+        
         return {
           id: img.id,
           url: url,
