@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Trip, TripImage } from "@/types/trip";
 import TripPrice from "./TripPrice";
 import ImageViewer from "./ImageViewer";
+import { ScrollArea } from "./ui/scroll-area";
 
 const DEFAULT_IMAGE = "/placeholder.svg";
 
@@ -166,14 +167,16 @@ const TripInfo = () => {
       <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip?.name}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
+        {/* Left content area with scrollable content */}
+        <div className="md:col-span-2 h-[calc(100vh-200px)] flex flex-col">
+          {/* Flyer image (always visible at top) */}
           {flyerImage && (
-            <div className="mb-6">
+            <div className="mb-6 flex-shrink-0">
               <div className="relative">
                 <img
                   src={flyerImage}
                   alt={trip.name}
-                  className="w-full rounded-lg object-cover max-h-[500px]"
+                  className="w-full rounded-lg object-cover max-h-[400px]"
                   onClick={() => setSelectedImageUrl(flyerImage || null)}
                   onError={(e) => {
                     console.error(`Failed to load flyer image: ${flyerImage}`);
@@ -187,68 +190,74 @@ const TripInfo = () => {
             </div>
           )}
           
-          {trip?.description && (
-            <div className="mb-6 prose max-w-none">
-              <h2 className="text-xl font-semibold mb-2">About This Trip</h2>
-              <p className="whitespace-pre-line">{trip.description}</p>
-            </div>
-          )}
-          
-          {otherImages.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Photos, Videos & Flyers</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {otherImages.map((image, index) => (
-                  <div 
-                    key={image.id} 
-                    className="aspect-square cursor-pointer relative group"
-                    onClick={() => setSelectedImageUrl(image.url)}
-                  >
-                    <img 
-                      src={image.url} 
-                      alt={`${trip.name} image ${index + 1}`} 
-                      className="w-full h-full object-cover rounded"
-                      onError={(e) => {
-                        console.error(`Failed to load gallery image: ${image.url}`);
-                        (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                      {image.isThumbnail && (
-                        <span className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                          Thumbnail
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+          {/* Scrollable content area */}
+          <ScrollArea className="flex-grow overflow-y-auto pr-4">
+            {trip?.description && (
+              <div className="mb-6 prose max-w-none">
+                <h2 className="text-xl font-semibold mb-2">About This Trip</h2>
+                <p className="whitespace-pre-line">{trip.description}</p>
               </div>
-            </div>
-          )}
-          
-          {trip?.videoLinks && trip.videoLinks.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Videos</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {trip.videoLinks.map((videoUrl, index) => (
-                  <div 
-                    key={index} 
-                    className="aspect-video bg-gray-100 rounded overflow-hidden cursor-pointer relative group"
-                    onClick={() => setSelectedVideoUrl(videoUrl)}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Video className="h-12 w-12 text-gray-500 group-hover:text-primary transition-colors" />
+            )}
+            
+            {/* Photos and Gallery section */}
+            {otherImages.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Photos & Gallery</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {otherImages.map((image, index) => (
+                    <div 
+                      key={image.id} 
+                      className="aspect-square cursor-pointer relative group"
+                      onClick={() => setSelectedImageUrl(image.url)}
+                    >
+                      <img 
+                        src={image.url} 
+                        alt={`${trip.name} image ${index + 1}`} 
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          console.error(`Failed to load gallery image: ${image.url}`);
+                          (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                        {image.isThumbnail && (
+                          <span className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                            Thumbnail
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2 text-xs text-center bg-black bg-opacity-60 text-white p-1 rounded">
-                      Video {index + 1}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            
+            {/* Videos section */}
+            {trip?.videoLinks && trip.videoLinks.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Videos</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {trip.videoLinks.map((videoUrl, index) => (
+                    <div 
+                      key={index} 
+                      className="aspect-video bg-gray-100 rounded overflow-hidden cursor-pointer relative group"
+                      onClick={() => setSelectedVideoUrl(videoUrl)}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Video className="h-12 w-12 text-gray-500 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2 text-xs text-center bg-black bg-opacity-60 text-white p-1 rounded">
+                        Video {index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
         </div>
         
+        {/* Right sidebar */}
         <div>
           <div className="bg-gray-50 p-6 rounded-lg mb-4 sticky top-4">
             <div className="flex items-center gap-2 mb-4">
