@@ -171,7 +171,9 @@ export type Database = {
           location: Database["public"]["Enums"]["trip_location"]
           name: string
           organizer_contact: string
+          organizer_email: string | null
           organizer_name: string
+          organizer_phone: string | null
           price: string | null
           show_trip: string
           spots: number | null
@@ -192,7 +194,9 @@ export type Database = {
           location: Database["public"]["Enums"]["trip_location"]
           name: string
           organizer_contact: string
+          organizer_email?: string | null
           organizer_name: string
+          organizer_phone?: string | null
           price?: string | null
           show_trip?: string
           spots?: number | null
@@ -213,7 +217,9 @@ export type Database = {
           location?: Database["public"]["Enums"]["trip_location"]
           name?: string
           organizer_contact?: string
+          organizer_email?: string | null
           organizer_name?: string
+          organizer_phone?: string | null
           price?: string | null
           show_trip?: string
           spots?: number | null

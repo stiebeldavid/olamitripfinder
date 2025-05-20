@@ -20,6 +20,8 @@ export interface Trip {
   organizer: {
     name: string;
     contact: string;
+    email?: string;
+    phone?: string;
   };
   gender: TripGender;
   location: TripLocation;

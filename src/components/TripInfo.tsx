@@ -10,7 +10,9 @@ import {
   ExternalLink,
   X,
   Video,
-  Download
+  Download,
+  Phone,
+  Mail
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,7 +114,9 @@ const TripInfo = () => {
         websiteUrl: data.website_url || "",
         organizer: {
           name: data.organizer_name,
-          contact: data.organizer_contact
+          contact: data.organizer_contact,
+          email: data.organizer_email,
+          phone: data.organizer_phone
         },
         gender: data.gender,
         location: data.location,
@@ -316,9 +320,27 @@ const TripInfo = () => {
             )}
             
             <div className="border-t border-gray-200 my-4 pt-4">
-              <h3 className="font-medium mb-2">Organized by:</h3>
-              <p className="mb-1">{trip.organizer.name}</p>
-              <p className="text-gray-600">{trip.organizer.contact}</p>
+              <h3 className="font-medium mb-2">For more information, contact {trip.organizer.name}:</h3>
+              
+              {trip.organizer.phone && (
+                <div className="flex items-center gap-2 mb-2">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span>{trip.organizer.phone}</span>
+                </div>
+              )}
+              
+              {trip.organizer.email && (
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <a href={`mailto:${trip.organizer.email}`} className="text-blue-600 hover:underline">
+                    {trip.organizer.email}
+                  </a>
+                </div>
+              )}
+              
+              {!trip.organizer.email && !trip.organizer.phone && trip.organizer.contact && (
+                <p className="text-gray-600">{trip.organizer.contact}</p>
+              )}
             </div>
             
             {trip.websiteUrl && (

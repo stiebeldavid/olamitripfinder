@@ -102,7 +102,9 @@ const AddTrip = () => {
           thumbnail_image: thumbnailImagePath,
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
-          price: formData.get('price') as string || null, // Added price field
+          organizer_email: formData.get('organizerEmail') as string || null,
+          organizer_phone: formData.get('organizerPhone') as string || null,
+          price: formData.get('price') as string || null,
           show_trip: 'Hidden',
           trip_id: nextTripId
         })
@@ -379,7 +381,6 @@ const AddTrip = () => {
                               setThumbnailImage(null);
                             }
                             
-                            // ... keep existing code (remove gallery image)
                             const newFiles = [...galleryFiles];
                             newFiles.splice(index, 1);
                             setGalleryFiles(newFiles);
@@ -406,9 +407,21 @@ const AddTrip = () => {
                   <Input id="organizerName" name="organizerName" required />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="organizerPhone">Organizer Phone *</Label>
+                    <Input id="organizerPhone" name="organizerPhone" required />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="organizerEmail">Organizer Email (optional)</Label>
+                    <Input id="organizerEmail" name="organizerEmail" type="email" />
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="organizerContact">Organizer Contact *</Label>
-                  <Input id="organizerContact" name="organizerContact" required />
+                  <Label htmlFor="organizerContact">Additional Contact Info (optional)</Label>
+                  <Input id="organizerContact" name="organizerContact" />
                 </div>
 
                 {/* Add video links section */}
