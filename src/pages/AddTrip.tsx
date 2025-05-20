@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -100,6 +101,7 @@ const AddTrip = () => {
           thumbnail_image: thumbnailImagePath,
           organizer_name: formData.get('organizerName') as string,
           organizer_contact: formData.get('organizerContact') as string,
+          price: formData.get('price') as string || null, // Added price field
           show_trip: 'Hidden',
           trip_id: nextTripId
         })
@@ -285,6 +287,15 @@ const AddTrip = () => {
                     name="spots"
                     type="number"
                     min="1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="price">Price (optional)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    placeholder="e.g. $1,000 - $1,500"
                   />
                 </div>
 

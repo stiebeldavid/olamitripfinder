@@ -117,7 +117,8 @@ const EditTrip = () => {
         thumbnailImage: data.thumbnail_image ? getPublicUrl(data.thumbnail_image) : null,
         gallery: galleryImages,
         videoLinks: data.videos?.map((v: any) => v.video_url) || [],
-        show_trip: data.show_trip
+        show_trip: data.show_trip,
+        price: data.price || ""
       };
     }
   });
@@ -162,6 +163,7 @@ const EditTrip = () => {
         organizer_name: formData.get('organizerName') as string,
         organizer_contact: formData.get('organizerContact') as string,
         show_trip: formData.get('show_trip') as string,
+        price: formData.get('price') as string || null,  // Added price field
       };
 
       // Set brochure image if uploaded
@@ -489,6 +491,16 @@ const EditTrip = () => {
                     type="number"
                     min="1"
                     defaultValue={trip.spots}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="price">Price (optional)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    placeholder="e.g. $1,000 - $1,500"
+                    defaultValue={trip.price}
                   />
                 </div>
 

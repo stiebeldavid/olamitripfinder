@@ -1,0 +1,242 @@
+
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Dialog } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import { format, parseISO } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Calendar as CalendarIcon, 
+  MapPin, 
+  Users, 
+  ExternalLink,
+  Contact,
+  Image as ImageIcon,
+  X
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { Trip } from "@/types/trip";
+import TripPrice from "./TripPrice";
+import ImageViewer from "./ImageViewer";
+
+const getPublicUrl = (path: string | null | undefined): string => {
+  if (!path) return "";
+  const {
+    data: {
+      publicUrl
+    }
+  } = supabase.storage.from('trip-photos').getPublicUrl(path);
+  return publicUrl || "";
+};
+
+const TripInfo = () => {
+  const { tripId } = useParams<{ tripId: string }>();
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  
+  const { data: trip, isLoading } = useQuery({
+    queryKey: ['trip', tripId],
+    queryFn: async () => {
+      if (!tripId) throw new Error("Trip ID is required");
+
+      const { data, error } = await supabase
+        .from('trips')
+        .select(`
+          *,
+          gallery:trip_gallery(id, image_path),
+          videos:trip_videos(id, video_url)
+        `)
+        .eq('trip_id', parseInt(tripId))
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Trip not found');
+
+      // Get brochure image URL
+      const brochureUrl = data.brochure_image_path ? getPublicUrl(data.brochure_image_path) : "";
+      
+      // Get gallery image URLs
+      const galleryImages = data.gallery?.map((g: any) => getPublicUrl(g.image_path)) || [];
+
+      return {
+        id: data.id,
+        trip_id: data.trip_id,
+        name: data.name,
+        description: data.description || "",
+        startDate: data.start_date,
+        endDate: data.end_date,
+        websiteUrl: data.website_url || "",
+        organizer: {
+          name: data.organizer_name,
+          contact: data.organizer_contact
+        },
+        gender: data.gender,
+        location: data.location,
+        spots: data.spots,
+        price: data.price,
+        brochureImage: brochureUrl,
+        gallery: galleryImages,
+        videoLinks: data.videos?.map((v: any) => v.video_url) || []
+      };
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-64 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Trip not found</h1>
+          <p>The requested trip could not be found.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip.name}</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          {trip.brochureImage && (
+            <div className="mb-6">
+              <img
+                src={trip.brochureImage}
+                alt={trip.name}
+                className="w-full rounded-lg object-cover max-h-[500px]"
+                onClick={() => setSelectedImageUrl(trip.brochureImage || null)}
+              />
+            </div>
+          )}
+          
+          {trip.description && (
+            <div className="mb-6 prose max-w-none">
+              <h2 className="text-xl font-semibold mb-2">About This Trip</h2>
+              <p className="whitespace-pre-line">{trip.description}</p>
+            </div>
+          )}
+          
+          {trip.gallery && trip.gallery.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2">Gallery</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {trip.gallery.map((imageUrl, index) => (
+                  <div 
+                    key={index} 
+                    className="aspect-square cursor-pointer"
+                    onClick={() => setSelectedImageUrl(imageUrl)}
+                  >
+                    <img 
+                      src={imageUrl} 
+                      alt={`${trip.name} image ${index + 1}`} 
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {trip.videoLinks && trip.videoLinks.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2">Videos</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {trip.videoLinks.map((videoUrl, index) => (
+                  <div key={index} className="aspect-video">
+                    <iframe
+                      src={videoUrl}
+                      title={`Video ${index + 1}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full rounded"
+                    ></iframe>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div>
+          <div className="bg-gray-50 p-6 rounded-lg mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <CalendarIcon className="h-5 w-5 text-gray-500" />
+              <span>
+                {format(parseISO(trip.startDate), "MMM d")} - {format(parseISO(trip.endDate), "MMM d, yyyy")}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="h-5 w-5 text-gray-500" />
+              <span>
+                {trip.location === "united_states" ? "United States" : 
+                trip.location === "international" ? "International" : "Israel"}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-gray-500" />
+              <span>
+                {trip.gender === "mixed" ? "Co-ed" : 
+                trip.gender === "male" ? "Men Only" : "Women Only"}
+              </span>
+            </div>
+            
+            {trip.spots && (
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-gray-500" />
+                <span>{trip.spots} Available Spots</span>
+              </div>
+            )}
+
+            {trip.price && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-emerald-600 font-semibold">{trip.price}</span>
+              </div>
+            )}
+            
+            <div className="border-t border-gray-200 my-4 pt-4">
+              <h3 className="font-medium mb-2">Organized by:</h3>
+              <p className="mb-1">{trip.organizer.name}</p>
+              <p className="text-gray-600">{trip.organizer.contact}</p>
+            </div>
+            
+            {trip.websiteUrl && (
+              <div className="mt-4">
+                <a href={trip.websiteUrl} target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full flex items-center justify-center gap-2">
+                    Visit Website
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {selectedImageUrl && (
+        <ImageViewer 
+          src={selectedImageUrl} 
+          alt={trip.name}
+          onClose={() => setSelectedImageUrl(null)} 
+        />
+      )}
+    </div>
+  );
+};
+
+export default TripInfo;

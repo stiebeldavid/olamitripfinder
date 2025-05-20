@@ -6,9 +6,10 @@ interface ImageViewerProps {
   src: string;
   alt: string;
   onClose: () => void;
+  tripId?: string; // Make tripId optional to maintain backward compatibility
 }
 
-const ImageViewer = ({ src, alt, onClose }: ImageViewerProps) => {
+const ImageViewer = ({ src, alt, onClose, tripId }: ImageViewerProps) => {
   return (
     <div className="fixed inset-0 bg-black z-[60] flex items-center justify-center">
       <Button
