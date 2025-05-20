@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +33,8 @@ const AddTrip = () => {
   const [brochurePreview, setBrochurePreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [thumbnailImage, setThumbnailImage] = useState<string | null>(null);
+  const [videoLinks, setVideoLinks] = useState<string[]>([]);
+  const [newVideoLink, setNewVideoLink] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -131,6 +132,20 @@ const AddTrip = () => {
         await Promise.all(galleryPromises);
       }
 
+      // Add video links if any
+      if (videoLinks.length > 0) {
+        const videoData = videoLinks.map(url => ({
+          trip_id: trip.id,
+          video_url: url
+        }));
+        
+        const { error: videoError } = await supabase
+          .from('trip_videos')
+          .insert(videoData);
+        
+        if (videoError) throw videoError;
+      }
+
       toast({
         title: "Success",
         description: "Trip created successfully",
@@ -164,6 +179,17 @@ const AddTrip = () => {
       const previews = files.map(file => URL.createObjectURL(file));
       setGalleryPreviews(prevPreviews => [...prevPreviews, ...previews]);
     }
+  };
+
+  const handleAddVideoLink = () => {
+    if (newVideoLink && !videoLinks.includes(newVideoLink)) {
+      setVideoLinks([...videoLinks, newVideoLink]);
+      setNewVideoLink("");
+    }
+  };
+
+  const handleRemoveVideoLink = (index: number) => {
+    setVideoLinks(videoLinks.filter((_, i) => i !== index));
   };
 
   useEffect(() => {
@@ -383,6 +409,38 @@ const AddTrip = () => {
                 <div>
                   <Label htmlFor="organizerContact">Organizer Contact *</Label>
                   <Input id="organizerContact" name="organizerContact" required />
+                </div>
+
+                {/* Add video links section */}
+                <div className="space-y-2">
+                  <Label>Video Links (optional)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newVideoLink}
+                      onChange={(e) => setNewVideoLink(e.target.value)}
+                      placeholder="Enter YouTube or Vimeo embed URL"
+                      className="flex-1"
+                    />
+                    <Button type="button" onClick={handleAddVideoLink}>Add</Button>
+                  </div>
+                  
+                  {videoLinks.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {videoLinks.map((link, index) => (
+                        <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                          <div className="flex-1 truncate">{link}</div>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleRemoveVideoLink(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
