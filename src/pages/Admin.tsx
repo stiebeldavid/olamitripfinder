@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Pencil, Copy, Eye, EyeOff } from "lucide-react";
-import { Trip, TripLocation } from "@/types/trip";
+import { Trip, TripLocation, TripImage } from "@/types/trip";
 import {
   Select,
   SelectContent,
@@ -46,7 +46,7 @@ export default function Admin() {
     queryFn: async () => {
       let query = supabase
         .from('trips')
-        .select('*')
+        .select('*, trip_images(*)') // Include the trip images
         .order('start_date', { ascending: true });
         
       // Only filter out deleted trips if showDeletedTrips is false
@@ -58,24 +58,35 @@ export default function Admin() {
       
       if (error) throw error;
       
-      return data.map((trip) => ({
-        id: trip.id,
-        trip_id: trip.trip_id,
-        name: trip.name,
-        description: trip.description,
-        startDate: trip.start_date,
-        endDate: trip.end_date,
-        websiteUrl: trip.website_url,
-        organizer: {
-          name: trip.organizer_name,
-          contact: trip.organizer_contact
-        },
-        gender: trip.gender,
-        location: trip.location,
-        spots: trip.spots,
-        brochureImage: trip.brochure_image_path,
-        show_trip: trip.show_trip
-      })) as Trip[];
+      return data.map((trip) => {
+        // Process trip_images into the format expected by our Trip type
+        const images: TripImage[] = trip.trip_images ? trip.trip_images.map((img: any) => ({
+          id: img.id,
+          url: img.image_path,
+          isThumbnail: img.is_thumbnail || false,
+          isFlyer: img.is_flyer || false
+        })) : [];
+
+        return {
+          id: trip.id,
+          trip_id: trip.trip_id,
+          name: trip.name,
+          description: trip.description,
+          startDate: trip.start_date,
+          endDate: trip.end_date,
+          websiteUrl: trip.website_url,
+          organizer: {
+            name: trip.organizer_name,
+            contact: trip.organizer_contact
+          },
+          gender: trip.gender,
+          location: trip.location,
+          spots: trip.spots,
+          images: images,
+          price: trip.price,
+          show_trip: trip.show_trip
+        };
+      }) as Trip[];
     },
     enabled: isAuthenticated
   });
@@ -145,33 +156,11 @@ export default function Admin() {
 
       const newTripId = (maxTripIdResult?.trip_id || 0) + 1;
 
-      // Copy brochure image if it exists
-      let newBrochureImagePath = null;
-      if (trip.brochureImage) {
-        const fileName = trip.brochureImage.split('/').pop();
-        if (fileName) {
-          const { data: brochureFile } = await supabase.storage
-            .from('trip-photos')
-            .download(`brochures/${fileName}`);
-
-          if (brochureFile) {
-            const newFileName = `brochures/${Date.now()}-${fileName}`;
-            const { data: uploadedFile } = await supabase.storage
-              .from('trip-photos')
-              .upload(newFileName, brochureFile);
-
-            if (uploadedFile) {
-              newBrochureImagePath = newFileName;
-            }
-          }
-        }
-      }
-
       // Create the new trip with the new trip_id
       const { data: newTrip, error: tripError } = await supabase
         .from('trips')
         .insert({
-          trip_id: newTripId, // Using the calculated next trip_id
+          trip_id: newTripId,
           name: `${trip.name} - Copy`,
           description: trip.description,
           start_date: trip.startDate,
@@ -180,7 +169,7 @@ export default function Admin() {
           gender: trip.gender,
           spots: trip.spots,
           website_url: trip.websiteUrl,
-          brochure_image_path: newBrochureImagePath,
+          price: trip.price,
           organizer_name: trip.organizer.name,
           organizer_contact: trip.organizer.contact,
           show_trip: 'Hidden' // Start as hidden by default
@@ -190,32 +179,29 @@ export default function Admin() {
 
       if (tripError) throw tripError;
 
-      // Get and copy gallery images
-      const { data: galleryImages } = await supabase
-        .from('trip_gallery')
-        .select('image_path')
-        .eq('trip_id', trip.id);
-
-      if (galleryImages && galleryImages.length > 0) {
-        for (const image of galleryImages) {
-          const fileName = image.image_path.split('/').pop();
+      // Duplicate the trip images
+      if (trip.images && trip.images.length > 0) {
+        for (const image of trip.images) {
+          const fileName = image.url.split('/').pop();
           if (fileName) {
-            const { data: galleryFile } = await supabase.storage
+            const { data: imageFile } = await supabase.storage
               .from('trip-photos')
               .download(`gallery/${fileName}`);
 
-            if (galleryFile) {
+            if (imageFile) {
               const newFileName = `gallery/${Date.now()}-${fileName}`;
               const { data: uploadedFile } = await supabase.storage
                 .from('trip-photos')
-                .upload(newFileName, galleryFile);
+                .upload(newFileName, imageFile);
 
               if (uploadedFile) {
                 await supabase
-                  .from('trip_gallery')
+                  .from('trip_images')
                   .insert({
                     trip_id: newTrip.id,
-                    image_path: newFileName
+                    image_path: newFileName,
+                    is_thumbnail: image.isThumbnail,
+                    is_flyer: image.isFlyer
                   });
               }
             }
