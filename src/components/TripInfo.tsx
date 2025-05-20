@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
@@ -51,6 +51,17 @@ const TripInfo = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
+  
+  // Add useEffect for scroll control when modal is open
+  useEffect(() => {
+    // Prevent background scrolling when modal is open
+    document.body.style.overflow = "hidden";
+    
+    return () => {
+      // Re-enable scrolling when component unmounts
+      document.body.style.overflow = "";
+    };
+  }, []);
   
   const { data: trip, isLoading } = useQuery({
     queryKey: ['trip', tripId],
@@ -162,6 +173,11 @@ const TripInfo = () => {
     document.body.removeChild(anchor);
   };
 
+  const handleModalWheel = (e: React.WheelEvent) => {
+    // Prevent wheel events from propagating to parent elements
+    e.stopPropagation();
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl md:text-4xl font-display font-medium mb-6">{trip?.name}</h1>
@@ -190,8 +206,11 @@ const TripInfo = () => {
             </div>
           )}
           
-          {/* Scrollable content area */}
-          <ScrollArea className="flex-grow overflow-y-auto pr-4">
+          {/* Scrollable content area with onWheel handler */}
+          <ScrollArea 
+            className="flex-grow overflow-y-auto pr-4"
+            onWheel={handleModalWheel}
+          >
             {trip?.description && (
               <div className="mb-6 prose max-w-none">
                 <h2 className="text-xl font-semibold mb-2">About This Trip</h2>
@@ -327,7 +346,10 @@ const TripInfo = () => {
       )}
 
       {selectedVideoUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4"
+          onClick={(e) => e.stopPropagation()} // Prevent click events from propagating
+        >
           <Button
             variant="ghost"
             size="icon"
