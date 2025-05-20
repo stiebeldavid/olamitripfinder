@@ -12,7 +12,8 @@ import {
   ExternalLink,
   Contact,
   Image as ImageIcon,
-  X
+  X,
+  Video
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,7 +137,7 @@ const TripInfo = () => {
                 {trip.gallery.map((imageUrl, index) => (
                   <div 
                     key={index} 
-                    className="aspect-square cursor-pointer"
+                    className="aspect-square cursor-pointer relative group"
                     onClick={() => setSelectedImageUrl(imageUrl)}
                   >
                     <img 
@@ -144,6 +145,9 @@ const TripInfo = () => {
                       alt={`${trip.name} image ${index + 1}`} 
                       className="w-full h-full object-cover rounded"
                     />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                      <ImageIcon className="text-white opacity-0 group-hover:opacity-100 h-8 w-8" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -155,7 +159,7 @@ const TripInfo = () => {
               <h2 className="text-xl font-semibold mb-2">Videos</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {trip.videoLinks.map((videoUrl, index) => (
-                  <div key={index} className="aspect-video">
+                  <div key={index} className="aspect-video bg-gray-100 rounded overflow-hidden">
                     <iframe
                       src={videoUrl}
                       title={`Video ${index + 1}`}
@@ -171,7 +175,7 @@ const TripInfo = () => {
         </div>
         
         <div>
-          <div className="bg-gray-50 p-6 rounded-lg mb-4">
+          <div className="bg-gray-50 p-6 rounded-lg mb-4 sticky top-4">
             <div className="flex items-center gap-2 mb-4">
               <CalendarIcon className="h-5 w-5 text-gray-500" />
               <span>
