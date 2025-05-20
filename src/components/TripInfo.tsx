@@ -35,6 +35,7 @@ const getPublicUrl = (path: string | null | undefined): string => {
       }
     } = supabase.storage.from('trip-photos').getPublicUrl(path);
     
+    console.log(`Getting public URL for ${path}: ${publicUrl}`);
     return publicUrl || DEFAULT_IMAGE;
   } catch (error) {
     console.error(`Failed to get public URL for ${path}:`, error);
@@ -66,12 +67,16 @@ const TripInfo = () => {
       if (!data) throw new Error('Trip not found');
 
       // Process images with the new structure
-      const images: TripImage[] = data.trip_images?.map((img: any) => ({
-        id: img.id,
-        url: getPublicUrl(img.image_path),
-        isThumbnail: img.is_thumbnail || false,
-        isFlyer: img.is_flyer || false
-      })) || [];
+      const images: TripImage[] = data.trip_images?.map((img: any) => {
+        console.log("Processing image:", img);
+        const url = getPublicUrl(img.image_path);
+        return {
+          id: img.id,
+          url: url,
+          isThumbnail: img.is_thumbnail || false,
+          isFlyer: img.is_flyer || false
+        };
+      }) || [];
       
       console.log('Processed images:', images);
       
@@ -121,8 +126,13 @@ const TripInfo = () => {
     );
   }
 
+  console.log("Trip images in render:", trip.images);
+  
   const flyerImage = trip.images.find(img => img.isFlyer)?.url;
   const otherImages = trip.images.filter(img => !img.isFlyer);
+
+  console.log("Flyer image:", flyerImage);
+  console.log("Other images:", otherImages);
 
   const handleDownload = (imageUrl: string) => {
     // Extract the filename from the URL
@@ -149,16 +159,21 @@ const TripInfo = () => {
         <div className="md:col-span-2">
           {flyerImage && (
             <div className="mb-6">
-              <img
-                src={flyerImage}
-                alt={trip.name}
-                className="w-full rounded-lg object-cover max-h-[500px]"
-                onClick={() => setSelectedImageUrl(flyerImage || null)}
-                onError={(e) => {
-                  console.error(`Failed to load flyer image: ${flyerImage}`);
-                  (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
-                }}
-              />
+              <div className="relative">
+                <img
+                  src={flyerImage}
+                  alt={trip.name}
+                  className="w-full rounded-lg object-cover max-h-[500px]"
+                  onClick={() => setSelectedImageUrl(flyerImage || null)}
+                  onError={(e) => {
+                    console.error(`Failed to load flyer image: ${flyerImage}`);
+                    (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                  }}
+                />
+                <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 text-xs rounded">
+                  Flyer Image
+                </div>
+              </div>
             </div>
           )}
           
