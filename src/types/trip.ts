@@ -2,6 +2,13 @@
 export type TripGender = "male" | "female" | "mixed";
 export type TripLocation = "united_states" | "international" | "israel";
 
+export interface TripImage {
+  id: string;
+  url: string;
+  isThumbnail: boolean;
+  isFlyer: boolean;
+}
+
 export interface Trip {
   id: string;
   trip_id: number;
@@ -17,10 +24,8 @@ export interface Trip {
   gender: TripGender;
   location: TripLocation;
   spots: number;
-  brochureImage?: string;
-  thumbnailImage?: string;
-  gallery?: string[];
+  images: TripImage[];
   videoLinks?: string[];
   show_trip?: string;
-  price?: string; // New field for trip price
+  price?: string;
 }

@@ -13,10 +13,10 @@ interface ImageViewerProps {
 
 const ImageViewer = ({ src, alt, onClose, onDownload, tripId }: ImageViewerProps) => {
   const [imageLoaded, setImageLoaded] = useState(true);
-  const DEFAULT_IMAGE = "/lovable-uploads/f5be19fc-8a6f-428a-b7ed-07d78c2b67fd.png";
+  const DEFAULT_IMAGE = "/placeholder.svg";
 
   return (
-    <div className="fixed inset-0 bg-black z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center">
       <div className="absolute top-4 right-4 flex gap-2">
         {onDownload && imageLoaded && (
           <Button
@@ -40,12 +40,13 @@ const ImageViewer = ({ src, alt, onClose, onDownload, tripId }: ImageViewerProps
       <img
         src={src}
         alt={alt}
-        className="max-h-screen max-w-full object-contain p-4"
+        className="max-h-[90vh] max-w-[90vw] object-contain"
         onError={(e) => {
           console.error(`Failed to load image in viewer: ${src}`);
           setImageLoaded(false);
           (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
         }}
+        onLoad={() => setImageLoaded(true)}
       />
     </div>
   );
