@@ -152,7 +152,8 @@ const TripInfo = () => {
     );
   }
 
-  console.log("Trip images in render:", trip.images);
+  console.log("Trip data in render:", trip);
+  console.log("Trip organizer:", trip.organizer);
   
   const flyerImage = trip.images.find(img => img.isFlyer)?.url;
   const otherImages = trip.images.filter(img => !img.isFlyer);

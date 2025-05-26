@@ -1,4 +1,5 @@
 
+
 export type TripGender = "male" | "female" | "mixed";
 export type TripLocation = "united_states" | "international" | "israel";
 
