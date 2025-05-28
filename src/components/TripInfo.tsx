@@ -321,12 +321,14 @@ const TripInfo = () => {
             )}
             
             <div className="border-t border-gray-200 my-4 pt-4">
-              <h3 className="font-medium mb-2">For more information, contact {trip.organizer.name}:</h3>
+              <h3 className="font-medium mb-2">Contact {trip.organizer.name}:</h3>
               
               {trip.organizer.phone && (
                 <div className="flex items-center gap-2 mb-2">
                   <Phone className="h-4 w-4 text-gray-500" />
-                  <span>{trip.organizer.phone}</span>
+                  <a href={`tel:${trip.organizer.phone}`} className="text-blue-600 hover:underline">
+                    {trip.organizer.phone}
+                  </a>
                 </div>
               )}
               
